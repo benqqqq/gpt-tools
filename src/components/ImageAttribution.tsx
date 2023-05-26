@@ -5,7 +5,7 @@ interface Properties {
 	author: IFruit['image']['author']
 }
 
-function onClick(event: MouseEvent): void {
+function handleClick(event: MouseEvent): void {
 	event.stopPropagation()
 }
 
@@ -21,7 +21,7 @@ export default function ImageAttribution({ author }: Properties): ReactElement {
 					target='_blank'
 					rel='noreferrer noopener'
 					className='underline'
-					onClick={onClick}
+					onClick={handleClick}
 				>
 					{author.name}
 				</a>
@@ -31,7 +31,7 @@ export default function ImageAttribution({ author }: Properties): ReactElement {
 					target='_blank'
 					rel='noreferrer noopener'
 					className='underline'
-					onClick={onClick}
+					onClick={handleClick}
 				>
 					Unsplash
 				</a>

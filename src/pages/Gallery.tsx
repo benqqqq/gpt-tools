@@ -1,4 +1,4 @@
-import getFruits from 'api/getFruits'
+import getFruits from 'services/getFruits'
 import Fruit from 'components/Fruit'
 import Head from 'components/Head'
 import LoadingOrError from 'components/LoadingOrError'

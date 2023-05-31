@@ -1,4 +1,4 @@
-import getFruits from 'api/getFruits'
+import getFruits from 'services/getFruits'
 import Head from 'components/Head'
 import ImageAttribution from 'components/ImageAttribution'
 import LoadingOrError from 'components/LoadingOrError'

@@ -1,20 +1,27 @@
 import type { ChangeEvent, ReactElement } from 'react'
-import { useCallback } from 'react'
-import { useOpenAiApiKey } from '../storage/hooks'
+import { useCallback, useEffect, useState } from 'react'
+import {
+	defaultSettingContext,
+	useSettingContext
+} from '../services/SettingContext'
 
 export default function Setting(): ReactElement {
-	const [openAiApiKey, setOpenAiApiKey, storeOpenAiApiKey, isLoading] =
-		useOpenAiApiKey()
+	const settingContext = useSettingContext()
+	const [setting, setSetting] = useState(defaultSettingContext.setting)
+
+	useEffect(() => {
+		setSetting(settingContext.setting)
+	}, [settingContext.setting])
 
 	const handleOnBlur = useCallback(async () => {
-		storeOpenAiApiKey()
-	}, [storeOpenAiApiKey])
+		settingContext.storeSetting('openaiApiKey', setting.openaiApiKey)
+	}, [settingContext, setting])
 
 	const handleOnChange = useCallback(
 		(event: ChangeEvent<HTMLInputElement>) => {
-			setOpenAiApiKey(event.target.value)
+			setSetting({ ...setting, openaiApiKey: event.target.value })
 		},
-		[setOpenAiApiKey]
+		[setting]
 	)
 
 	return (
@@ -22,15 +29,15 @@ export default function Setting(): ReactElement {
 			<h1>Setting</h1>
 			<ul>
 				<li>
-					OPENAI_API_KEY :{' '}
+					OPENAI_API_KEY :
 					<input
 						className='text-orange-700'
-						value={openAiApiKey}
+						value={setting.openaiApiKey}
 						onBlur={handleOnBlur}
 						onChange={handleOnChange}
 						type='password'
 						placeholder='openai api key'
-						readOnly={isLoading}
+						readOnly={settingContext.isLoading}
 					/>
 				</li>
 			</ul>

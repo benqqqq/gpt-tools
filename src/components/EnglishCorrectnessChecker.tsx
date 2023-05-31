@@ -1,14 +1,15 @@
 import type { ReactElement } from 'react'
 import { useCallback, useState } from 'react'
-import { useOpenAI } from '../api/OpenAiContext'
 import Setting from './Setting'
+import { promptText } from './prompts'
+import { useOpenAI } from '../services/OpenAiContext'
 
-const GPT_TEMPERATURE = 0.8
 export default function EnglishCorrectnessChecker(): ReactElement {
 	const [text, setText] = useState('This is a sample text')
 	const [answer, setAnswer] = useState('')
+	const [isSubmitting, setIsSubmitting] = useState(false)
 	const openai = useOpenAI()
-	const handleOnChange = useCallback(
+	const handleTextChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement>): void => {
 			setText(event.target.value)
 		},
@@ -16,38 +17,49 @@ export default function EnglishCorrectnessChecker(): ReactElement {
 	)
 
 	const handleSumit = useCallback(async (): Promise<void> => {
-		const resp = await openai.createChatCompletion({
-			model: 'gpt-3.5-turbo',
-			messages: [
-				{
-					role: 'user',
-					content: text
-				}
-			],
-			temperature: GPT_TEMPERATURE
+		setIsSubmitting(true)
+		await openai.chatCompletion({
+			systemPrompt: promptText,
+			userPrompt: text,
+			onContent: (content: string): void => {
+				setAnswer(ans => ans + content)
+			}
 		})
-		setAnswer(JSON.stringify(resp.data))
+		setIsSubmitting(false)
 	}, [openai, text])
 
 	return (
 		<>
 			<Setting />
+			Prompt Text
+			<textarea
+				className='text-black'
+				cols={30}
+				rows={10}
+				value={promptText}
+				readOnly
+			/>
+			Input Text
 			<textarea
 				className='text-black'
 				cols={30}
 				rows={10}
 				value={text}
-				onChange={handleOnChange}
+				onChange={handleTextChange}
 			/>
-
-			<button type='submit' onClick={handleSumit}>
+			<button type='submit' onClick={handleSumit} disabled={isSubmitting}>
 				Submit
 			</button>
-
 			<hr />
 			<h3>Answer</h3>
 			<hr />
-			{answer}
+			<textarea
+				className='text-black'
+				cols={30}
+				rows={30}
+				value={answer}
+				readOnly
+			/>
 		</>
 	)
 }

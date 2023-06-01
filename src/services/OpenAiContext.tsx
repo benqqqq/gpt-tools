@@ -15,6 +15,7 @@ interface IChatCompletionOptions {
 	systemPrompt: string
 	userPrompt: string
 	onContent: (content: string) => void
+	onFinish: () => void
 }
 
 interface IChatCompletionData {
@@ -35,7 +36,7 @@ const defaultOpenAiApi: IOpenAiApi = {
 
 const chatCompletion = async (
 	apiKey: string,
-	{ systemPrompt, userPrompt, onContent }: IChatCompletionOptions
+	{ systemPrompt, userPrompt, onContent, onFinish }: IChatCompletionOptions
 ): Promise<void> => {
 	const resp = await fetch('https://api.openai.com/v1/chat/completions', {
 		method: 'POST',
@@ -61,7 +62,15 @@ const chatCompletion = async (
 	})
 	const parser = createParser(event => {
 		if (event.type === 'event') {
-			const data = JSON.parse(event.data) as IChatCompletionData
+			let data
+			try {
+				data = JSON.parse(event.data) as IChatCompletionData
+			} catch (error) {
+				if (event.data === '[DONE]') {
+					return
+				}
+				throw error
+			}
 			onContent(data.choices[0].delta.content ?? '')
 		}
 	})
@@ -75,6 +84,7 @@ const chatCompletion = async (
 			// eslint-disable-next-line no-await-in-loop
 			const { done, value } = await reader.read()
 			if (done) {
+				onFinish()
 				break
 			}
 			parser.feed(new TextDecoder().decode(value))

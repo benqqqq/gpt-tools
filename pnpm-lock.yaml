@@ -13,9 +13,15 @@ dependencies:
   dexie-react-hooks:
     specifier: ^1.1.3
     version: 1.1.3(@types/react@18.2.6)(dexie@3.2.3)(react@18.2.0)
+  diff:
+    specifier: ^5.1.0
+    version: 5.1.0
   eventsource-parser:
     specifier: ^1.0.0
     version: 1.0.0
+  js-yaml:
+    specifier: ^4.1.0
+    version: 4.1.0
   react:
     specifier: 18.2.0
     version: 18.2.0
@@ -51,6 +57,12 @@ devDependencies:
   '@types/css-mediaquery':
     specifier: 0.1.1
     version: 0.1.1
+  '@types/diff':
+    specifier: ^5.0.3
+    version: 5.0.3
+  '@types/js-yaml':
+    specifier: ^4.0.5
+    version: 4.0.5
   '@types/react':
     specifier: 18.2.6
     version: 18.2.6
@@ -3147,6 +3159,13 @@ packages:
       '@types/ms': 0.7.31
     dev: true
 
+  /@types/diff@5.0.3:
+    resolution:
+      {
+        integrity: sha512-amrLbRqTU9bXMCc6uX0sWpxsQzRIo9z6MJPkH1pkez/qOxuqSZVuryJAWoBRq94CeG8JxY+VK4Le9HtjQR5T9A==
+      }
+    dev: true
+
   /@types/eslint@8.21.1:
     resolution:
       {
@@ -3192,6 +3211,13 @@ packages:
     resolution:
       {
         integrity: sha512-qC4bCqYGy1y/NP7dDVr7KJarn+PbX1nSpwA7JXdu0HxT3QYjO8MJ+cntENtHFVy2dRAyBV23OZ6MxsW1AM1L8g==
+      }
+    dev: true
+
+  /@types/js-yaml@4.0.5:
+    resolution:
+      {
+        integrity: sha512-FhpRzf927MNQdRZP0J5DLIdTXhjLYzeUTmLAu69mnVksLH9CJY3IuSeEgbKUki7GQZm0WqDkGzyxju2EZGD2wA==
       }
     dev: true
 
@@ -3839,7 +3865,6 @@ packages:
       {
         integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==
       }
-    dev: true
 
   /aria-query@5.0.0:
     resolution:
@@ -5223,6 +5248,14 @@ packages:
       }
     engines: { node: '>=0.3.1' }
     dev: true
+
+  /diff@5.1.0:
+    resolution:
+      {
+        integrity: sha512-D+mk+qE8VC/PAUrlAU34N+VfXev0ghe5ywmpqrawphmVZc1bEfn56uo9qpyGp1p4xpzOHkSW4ztBd6L7Xx4ACw==
+      }
+    engines: { node: '>=0.3.1' }
+    dev: false
 
   /dir-glob@3.0.1:
     resolution:
@@ -7718,7 +7751,6 @@ packages:
     hasBin: true
     dependencies:
       argparse: 2.0.1
-    dev: true
 
   /jsbn@0.1.1:
     resolution:

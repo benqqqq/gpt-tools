@@ -16,7 +16,13 @@ interface ISetting {
 export interface ISettingContext {
 	setting: ISetting
 	isLoading: boolean
-	storeSetting: (settingKey: keyof ISetting, value: string) => void
+	storeSetting: (
+		settingKey: keyof ISetting,
+		value: string,
+		options?: {
+			simulateDelayMs?: number
+		}
+	) => void
 }
 
 export const defaultSettingContext: ISettingContext = {
@@ -55,8 +61,13 @@ export function SettingProvider({
 	}, [])
 
 	const storeSetting = useCallback(
-		async (settingKey: keyof ISetting, value: string) => {
+		async (
+			settingKey: keyof ISetting,
+			value: string,
+			{ simulateDelayMs = 0 } = {}
+		) => {
 			setIsLoading(true)
+			const startTimeInMs = performance.now()
 
 			const updatedCount = await database.credentials
 				.where('name')
@@ -72,7 +83,15 @@ export function SettingProvider({
 					value
 				})
 			}
-			setIsLoading(false)
+
+			if (simulateDelayMs > 0) {
+				setTimeout(
+					() => setIsLoading(false),
+					Math.max(0, startTimeInMs + simulateDelayMs - performance.now())
+				)
+			} else {
+				setIsLoading(false)
+			}
 		},
 		[]
 	)

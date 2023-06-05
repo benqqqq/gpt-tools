@@ -5,7 +5,7 @@ import type { ISettingContext } from './SettingContext'
 import { useSettingContext } from './SettingContext'
 import { createParser } from 'eventsource-parser'
 
-const GPT_TEMPERATURE = 0.8
+const GPT_TEMPERATURE = 0
 
 interface IOpenAiApi {
 	chatCompletion: (options: IChatCompletionOptions) => Promise<void>

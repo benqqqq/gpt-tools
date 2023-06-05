@@ -34,3 +34,8 @@ export interface IDataReason {
 	line: number
 	reason: string
 }
+
+export interface IAnswerMapValue {
+	answer: string
+	createdAt: Date
+}

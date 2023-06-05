@@ -12,7 +12,7 @@ export default function GptToolPage(): ReactElement {
 
 	return (
 		<>
-			<Head title='GPT Tools' />
+			<Head title='English Correctness Checker' />
 			<SettingProvider>
 				<OpenAIProvider>
 					<EnglishCorrectnessChecker />

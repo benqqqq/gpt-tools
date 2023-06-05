@@ -18,6 +18,7 @@ Finally, please grade my original paragraph on a scale of 1 to 10, with 10 being
 you should first separate the paragraph into multiple lines based on the rhythm,
 then assign each line a number identifier start from 1, then
 output following information in json lines format, you have following choices for output json line
+you should only output json lines format, without anyother plain text
 1. {"type": "correction", "data": { "line": <line identifier>, "original": <original content>, "refined": <refined content>, "scrore": <content> }}
 	* for each line (identified by "line"), there is only one "correction type"
 

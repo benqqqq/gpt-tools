@@ -5,19 +5,23 @@ import type { AlertColor } from '@mui/material/Alert/Alert'
 
 export const useSnackbar = (): [
 	(message: string, severity: AlertColor) => void,
+	() => void,
 	ReactElement
 ] => {
 	const [isOpen, setIsOpen] = useState(false)
 	const [snackSeverity, setSnackSeverity] = useState<AlertColor>('success')
 	const [snackMessage, setSnackMessage] = useState('')
-	const handleClose = useCallback(() => {
-		setIsOpen(false)
-	}, [])
 	const open = useCallback((message: string, severity: AlertColor) => {
 		setSnackMessage(message)
 		setSnackSeverity(severity)
 		setIsOpen(true)
 	}, [])
+	const close = useCallback(() => {
+		setIsOpen(false)
+	}, [])
+	const handleClose = useCallback(() => {
+		close()
+	}, [close])
 
 	const snackbarComponent = useMemo(
 		() => (
@@ -35,7 +39,7 @@ export const useSnackbar = (): [
 		[handleClose, isOpen, snackMessage, snackSeverity]
 	)
 
-	return [open, snackbarComponent]
+	return [open, close, snackbarComponent]
 }
 
 export default {

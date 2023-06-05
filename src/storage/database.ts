@@ -7,17 +7,29 @@ export interface Credential {
 	value: string
 }
 
-const VERSION = 1
+export interface Conversation {
+	id?: number
+	scope: string
+	key: string
+	value: string
+	createdAt: Date
+}
+
+const VERSION = 4
 
 export class MySubClassedDexie extends Dexie {
 	// 'friends' is added by dexie when declaring the stores()
 	// We just tell the typing system this is the case
 	public readonly credentials!: Table<Credential>
 
+	public readonly conversations!: Table<Conversation>
+
 	public constructor() {
 		super('gpt-tools')
 		this.version(VERSION).stores({
-			credentials: '++id, name, value' // Primary key and indexed props
+			// Primary key and indexed props
+			credentials: '++id, name',
+			conversations: '++id, scope, key, createdAt'
 		})
 	}
 }

@@ -5,8 +5,7 @@ export interface IJSONAnswer {
 		refined?: string
 		score?: number
 		reasons: string[]
-		diff?: {
-			key: number
+		diff: {
 			added?: boolean
 			removed?: boolean
 			value: string

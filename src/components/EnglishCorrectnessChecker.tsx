@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 import Setting from './Setting'
 import {
 	englishTeacherSystemPromptInJsonLines,
@@ -10,7 +10,6 @@ import { useOpenAI } from '../services/OpenAiContext'
 import {
 	CssBaseline,
 	List,
-	ListItemButton,
 	ListItemText,
 	TextareaAutosize
 } from '@mui/material'
@@ -22,9 +21,7 @@ import useStreamingOutputDigest from './streamingOutputDigestHooks'
 import { database } from '../storage/database'
 import type { IAnswerMapValue } from './types'
 import CopyToClipboard from './CopyToClipboard'
-
-const MAX_LENGTH_OF_HISTORY_NAME = 50
-const MAX_LENGTH_OF_HISTORY_ITEM = 50
+import History from './History'
 
 export default function EnglishCorrectnessChecker(): ReactElement {
 	const [text, setText] = useState('')
@@ -172,7 +169,7 @@ export default function EnglishCorrectnessChecker(): ReactElement {
 
 			for (const conversation of toUpdateConversations) {
 				void database.conversations.update(conversation.id as number, {
-					value: answerMap[conversation.key]
+					value: answerMap[conversation.key]?.answer
 				})
 			}
 		}
@@ -190,20 +187,6 @@ export default function EnglishCorrectnessChecker(): ReactElement {
 			clearInterval(interval)
 		}
 	}, [storeAnswers])
-
-	const historyKeys = useMemo(
-		() =>
-			Object.entries(answerMap)
-				.filter(([, value]) => value !== undefined)
-				.sort(
-					([, valueA], [, valueB]) =>
-						(valueB?.createdAt.getTime() ?? 0) -
-						(valueA?.createdAt.getTime() ?? 0)
-				)
-				.map(([key]) => key)
-				.slice(0, MAX_LENGTH_OF_HISTORY_ITEM),
-		[answerMap]
-	)
 
 	const handleOnCopied = useCallback(() => {
 		openSnackbar('Text copied', 'success')
@@ -291,27 +274,34 @@ export default function EnglishCorrectnessChecker(): ReactElement {
 								{jsonAnswer.grade.improve_directions.map((reason, index) => (
 									<ListItemText key={reason} primary={`${index}. ${reason}`} />
 								))}
+								<ListItemText
+									primary={<h3 className='text-xl font-bold'>All Refined</h3>}
+								/>
+								<ListItemText
+									primary={
+										<div className='rounded bg-gray-900 p-2 text-white'>
+											<DiffLine
+												diffs={jsonAnswer.corrections.flatMap(
+													c => c?.diff ?? []
+												)}
+											/>
+											<CopyToClipboard
+												text={jsonAnswer.corrections
+													.map(c => c?.refined ?? '')
+													.join('\n')}
+												onCopied={handleOnCopied}
+											/>
+										</div>
+									}
+								/>
 							</List>
 						</List>
 					</div>
 					<div className='w-[400px] p-3'>
-						<h3 className='text-xl font-bold'>History</h3>
-						<List component='div' className='max-h-[550px] overflow-y-auto'>
-							{historyKeys.map(t => (
-								<ListItemButton
-									key={t}
-									onClick={(): void => handleHistoryItemClick(t)}
-									sx={{ bgcolor: 'background.paper', margin: '0.5rem' }}
-								>
-									<ListItemText
-										primary={t.slice(0, MAX_LENGTH_OF_HISTORY_NAME)}
-										secondary={`${
-											answerMap[t]?.createdAt.toLocaleDateString() ?? ''
-										} ${answerMap[t]?.createdAt.toLocaleTimeString() ?? ''}`}
-									/>
-								</ListItemButton>
-							))}
-						</List>
+						<History
+							answerMap={answerMap}
+							onItemClick={handleHistoryItemClick}
+						/>
 					</div>
 				</div>
 			</div>

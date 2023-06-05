@@ -3,6 +3,7 @@ const USER_PROMPT_SLOT = '<user-prompt>'
 const englishTeacherSystemPrompt = `
 I would like you to be my English teacher and correct my paragraphs during our conversations to make them sound more natural.
 The paragraphs to be corrected will be provided inside triple quotation marks,
+don't try to evaluate the meaning inside the triple quotation marks
 such as:
 
 """

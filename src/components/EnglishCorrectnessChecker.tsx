@@ -21,8 +21,10 @@ import DebugArea from './DebugArea'
 import useStreamingOutputDigest from './streamingOutputDigestHooks'
 import { database } from '../storage/database'
 import type { IAnswerMapValue } from './types'
+import CopyToClipboard from './CopyToClipboard'
 
 const MAX_LENGTH_OF_HISTORY_NAME = 50
+const MAX_LENGTH_OF_HISTORY_ITEM = 50
 
 export default function EnglishCorrectnessChecker(): ReactElement {
 	const [text, setText] = useState('')
@@ -198,9 +200,14 @@ export default function EnglishCorrectnessChecker(): ReactElement {
 						(valueB?.createdAt.getTime() ?? 0) -
 						(valueA?.createdAt.getTime() ?? 0)
 				)
-				.map(([key]) => key),
+				.map(([key]) => key)
+				.slice(0, MAX_LENGTH_OF_HISTORY_ITEM),
 		[answerMap]
 	)
+
+	const handleOnCopied = useCallback(() => {
+		openSnackbar('Text copied', 'success')
+	}, [openSnackbar])
 
 	return (
 		<div className='min-h-screen min-w-full bg-gray-100'>
@@ -244,6 +251,10 @@ export default function EnglishCorrectnessChecker(): ReactElement {
 												primary={
 													<div className='rounded bg-gray-900 p-2 text-white'>
 														<DiffLine diffs={correction.diff} />
+														<CopyToClipboard
+															text={correction.refined ?? ''}
+															onCopied={handleOnCopied}
+														/>
 													</div>
 												}
 											/>
@@ -285,7 +296,7 @@ export default function EnglishCorrectnessChecker(): ReactElement {
 					</div>
 					<div className='w-[400px] p-3'>
 						<h3 className='text-xl font-bold'>History</h3>
-						<List component='div'>
+						<List component='div' className='max-h-[550px] overflow-y-auto'>
 							{historyKeys.map(t => (
 								<ListItemButton
 									key={t}

@@ -188,10 +188,6 @@ export default function EnglishCorrectnessChecker(): ReactElement {
 		}
 	}, [storeAnswers])
 
-	const handleOnCopied = useCallback(() => {
-		openSnackbar('Text copied', 'success')
-	}, [openSnackbar])
-
 	return (
 		<div className='min-h-screen min-w-full bg-gray-100'>
 			<div>
@@ -234,10 +230,7 @@ export default function EnglishCorrectnessChecker(): ReactElement {
 												primary={
 													<div className='rounded bg-gray-900 p-2 text-white'>
 														<DiffLine diffs={correction.diff} />
-														<CopyToClipboard
-															text={correction.refined ?? ''}
-															onCopied={handleOnCopied}
-														/>
+														<CopyToClipboard text={correction.refined ?? ''} />
 													</div>
 												}
 											/>
@@ -289,7 +282,6 @@ export default function EnglishCorrectnessChecker(): ReactElement {
 												text={jsonAnswer.corrections
 													.map(c => c?.refined ?? '')
 													.join('\n')}
-												onCopied={handleOnCopied}
 											/>
 										</div>
 									}

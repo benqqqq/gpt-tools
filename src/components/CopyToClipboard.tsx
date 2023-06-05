@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { Tooltip } from '@mui/material'
 
 function CopyClipboardIcon(): ReactElement {
@@ -31,11 +31,17 @@ function CopyToClipboard({
 	text,
 	onCopied = noopFunction
 }: CopyToClipboardProperties): ReactElement {
+	const [isCopied, setIsCopied] = useState(false)
+	const COPIED_TIMEOUT_MS = 1000
 	const handleCopy = useCallback(() => {
 		const handleCopyFunction = async (): Promise<void> => {
+			setIsCopied(true)
 			try {
 				await navigator.clipboard.writeText(text)
 				onCopied()
+				setTimeout(() => {
+					setIsCopied(false)
+				}, COPIED_TIMEOUT_MS)
 			} catch (error) {
 				console.error('Failed to copy text:', error)
 			}
@@ -45,9 +51,13 @@ function CopyToClipboard({
 	}, [text, onCopied])
 	return (
 		<Tooltip title='Copy to Clipboard'>
-			<button type='button' onClick={handleCopy}>
-				<CopyClipboardIcon />
-			</button>
+			{isCopied ? (
+				<span>Copied !</span>
+			) : (
+				<button type='button' onClick={handleCopy}>
+					<CopyClipboardIcon />
+				</button>
+			)}
 		</Tooltip>
 	)
 }

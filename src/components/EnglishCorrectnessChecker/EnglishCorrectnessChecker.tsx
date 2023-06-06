@@ -1,12 +1,12 @@
 import type { ReactElement } from 'react'
 import { Fragment, useCallback, useEffect, useState } from 'react'
-import Setting from './Setting'
+import Setting from '../common/Setting'
 import {
 	englishTeacherSystemPromptInJsonLines,
 	englishTeacherUserPrompt,
 	generateUserPrompt
 } from './prompts'
-import { useOpenAI } from '../services/OpenAiContext'
+import { useOpenAI } from '../../services/OpenAiContext'
 import {
 	CssBaseline,
 	List,
@@ -14,13 +14,13 @@ import {
 	TextareaAutosize
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
-import { useSnackbar } from './snackbarHooks'
-import DiffLine from './DiffLine'
+import { useSnackbar } from '../common/useSnackbar'
+import DiffLine from '../common/DiffLine'
 import DebugArea from './DebugArea'
-import useStreamingOutputDigest from './streamingOutputDigestHooks'
-import { database } from '../storage/database'
+import useStreamingOutputDigest from './hooks'
+import { database } from '../../storage/database'
 import type { IAnswerMapValue } from './types'
-import CopyToClipboard from './CopyToClipboard'
+import CopyToClipboard from '../common/CopyToClipboard'
 import History from './History'
 
 export default function EnglishCorrectnessChecker(): ReactElement {

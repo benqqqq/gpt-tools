@@ -1,6 +1,6 @@
-import Head from 'components/Head'
+import Head from 'components/common/Head'
 import type { ReactElement } from 'react'
-import EnglishCorrectnessChecker from '../components/EnglishCorrectnessChecker'
+import EnglishCorrectnessChecker from '../components/EnglishCorrectnessChecker/EnglishCorrectnessChecker'
 import { OpenAIProvider } from '../services/OpenAiContext'
 import { SettingProvider } from '../services/SettingContext'
 

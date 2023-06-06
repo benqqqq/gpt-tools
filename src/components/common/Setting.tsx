@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import {
 	defaultSettingContext,
 	useSettingContext
-} from '../services/SettingContext'
+} from '../../services/SettingContext'
 import { Checkbox, FormControlLabel, FormGroup, TextField } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 

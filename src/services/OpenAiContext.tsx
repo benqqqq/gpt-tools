@@ -12,7 +12,7 @@ interface IOpenAiApi {
 }
 
 interface IChatCompletionOptions {
-	systemPrompt: string
+	systemPrompts: string[]
 	userPrompt: string
 	onContent: (content: string) => void
 	onFinish: () => void
@@ -36,7 +36,7 @@ const defaultOpenAiApi: IOpenAiApi = {
 
 const chatCompletion = async (
 	apiKey: string,
-	{ systemPrompt, userPrompt, onContent, onFinish }: IChatCompletionOptions
+	{ systemPrompts, userPrompt, onContent, onFinish }: IChatCompletionOptions
 ): Promise<void> => {
 	const resp = await fetch('https://api.openai.com/v1/chat/completions', {
 		method: 'POST',
@@ -47,10 +47,10 @@ const chatCompletion = async (
 		body: JSON.stringify({
 			model: 'gpt-3.5-turbo',
 			messages: [
-				{
+				...systemPrompts.map(systemPrompt => ({
 					role: 'system',
 					content: systemPrompt
-				},
+				})),
 				{
 					role: 'user',
 					content: userPrompt
@@ -74,6 +74,11 @@ const chatCompletion = async (
 			onContent(data.choices[0].delta.content ?? '')
 		}
 	})
+	const SUCCESS = 200
+	if (resp.status !== SUCCESS) {
+		throw new Error(await resp.text())
+	}
+
 	const reader = resp.body?.getReader()
 	if (!reader) {
 		throw new Error('no reader')

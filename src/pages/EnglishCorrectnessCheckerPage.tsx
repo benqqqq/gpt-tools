@@ -4,7 +4,7 @@ import EnglishCorrectnessChecker from '../components/EnglishCorrectnessChecker/E
 import { OpenAIProvider } from '../services/OpenAiContext'
 import { SettingProvider } from '../services/SettingContext'
 
-export default function GptToolPage(): ReactElement {
+export default function EnglishCorrectnessCheckerPage(): ReactElement {
 	// const { isLoading, isError, error, data } = useQuery(['fruits'], getFruits)
 	// if (isLoading || isError) {
 	// 	return <LoadingOrError error={error as Error} />

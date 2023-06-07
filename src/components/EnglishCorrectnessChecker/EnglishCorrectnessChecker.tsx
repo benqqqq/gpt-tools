@@ -7,12 +7,7 @@ import {
 	generateUserPrompt
 } from './prompts'
 import { useOpenAI } from '../../services/OpenAiContext'
-import {
-	CssBaseline,
-	List,
-	ListItemText,
-	TextareaAutosize
-} from '@mui/material'
+import { List, ListItemText, TextareaAutosize } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import { useSnackbar } from '../common/useSnackbar'
 import DiffLine from '../common/DiffLine'
@@ -41,38 +36,42 @@ export default function EnglishCorrectnessChecker(): ReactElement {
 	)
 	const [openSnackbar, closeSnackbar, snackbarComponent] = useSnackbar()
 
-	const handleSumit = useCallback(async (): Promise<void> => {
+	const handleSubmit = useCallback(async (): Promise<void> => {
+		if (isSubmitting) {
+			return
+		}
 		setAnswer('')
 		setIsSubmitting(true)
 		setSubmittingText(text)
 		closeSnackbar()
-		await openai.chatCompletion({
-			systemPrompt: englishTeacherSystemPromptInJsonLines,
-			userPrompt: generateUserPrompt(englishTeacherUserPrompt, text),
-			onContent: (content: string): void => {
-				setAnswer(ans => ans + content)
-			},
-			onFinish: (): void => {
-				setIsSubmitting(false)
-				setAnswerMap(previousAnswerMap => ({
-					...previousAnswerMap,
-					[text]: undefined
-				}))
-			}
-		})
-	}, [closeSnackbar, openai, text])
-
-	const handleFocus = useCallback(() => {
-		// setText('')
-	}, [])
+		try {
+			await openai.chatCompletion({
+				systemPrompts: [englishTeacherSystemPromptInJsonLines],
+				userPrompt: generateUserPrompt(englishTeacherUserPrompt, text),
+				onContent: (content: string): void => {
+					setAnswer(ans => ans + content)
+				},
+				onFinish: (): void => {
+					setIsSubmitting(false)
+					setAnswerMap(previousAnswerMap => ({
+						...previousAnswerMap,
+						[text]: undefined
+					}))
+				}
+			})
+		} catch (error) {
+			openSnackbar((error as Error).message, 'error')
+			setIsSubmitting(false)
+		}
+	}, [closeSnackbar, isSubmitting, openSnackbar, openai, text])
 
 	const handleKeyDown = useCallback(
 		(event: React.KeyboardEvent) => {
 			if (event.metaKey && event.key === 'Enter') {
-				void handleSumit()
+				void handleSubmit()
 			}
 		},
-		[handleSumit]
+		[handleSubmit]
 	)
 
 	const handleHistoryItemClick = useCallback(
@@ -196,7 +195,6 @@ export default function EnglishCorrectnessChecker(): ReactElement {
 						English Correctness Checker
 					</h1>
 				</div>
-				<CssBaseline />
 				<div className='bg-gray-200 p-3'>
 					<Setting />
 				</div>
@@ -206,7 +204,6 @@ export default function EnglishCorrectnessChecker(): ReactElement {
 							<TextareaAutosize
 								value={text}
 								onChange={handleTextChange}
-								onFocus={handleFocus}
 								onKeyDown={handleKeyDown}
 								className='w-96 rounded-xl border-gray-300'
 								autoFocus
@@ -215,7 +212,7 @@ export default function EnglishCorrectnessChecker(): ReactElement {
 							<LoadingButton
 								variant='outlined'
 								type='submit'
-								onClick={handleSumit}
+								onClick={handleSubmit}
 								loading={isSubmitting}
 							>
 								Submit

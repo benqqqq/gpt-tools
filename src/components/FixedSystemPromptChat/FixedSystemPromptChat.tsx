@@ -10,6 +10,7 @@ import { defaultSystemPrompt, prompts } from './prompt'
 import ReactMarkdown from 'react-markdown'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs'
+import remarkGfm from 'remark-gfm'
 
 export default function FixedSystemPromptChat(): ReactElement {
 	const [text, setText] = useState('')
@@ -130,13 +131,14 @@ export default function FixedSystemPromptChat(): ReactElement {
 						<TextareaAutosize
 							value={selectedPrompt.systemPrompt}
 							onChange={handleSystemPromptChange}
-							className='w-96 rounded-xl border-gray-300'
+							className='w-[600px] rounded-xl border-gray-300'
 						/>
 					</div>
 				</div>
 			</div>
-			<div className='bg-white p-5'>
+			<div className='bg-white px-14 py-3'>
 				<ReactMarkdown
+					remarkPlugins={[remarkGfm]}
 					components={{
 						// eslint-disable-next-line react/no-unstable-nested-components
 						code({
@@ -167,13 +169,27 @@ export default function FixedSystemPromptChat(): ReactElement {
 									{children}
 								</code>
 							)
+						},
+						// eslint-disable-next-line react/no-unstable-nested-components,unicorn/no-keyword-prefix
+						li({ children, ordered, className, ...properties }): ReactElement {
+							return (
+								<li
+									/* eslint-disable-next-line unicorn/no-keyword-prefix */
+									className={`${className ?? ''} ${
+										ordered ? ' list-decimal' : 'list-disc'
+									}`}
+									/* eslint-disable-next-line react/jsx-props-no-spreading */
+									{...properties}
+								>
+									{children}
+								</li>
+							)
 						}
 					}}
 				>
 					{answer}
 				</ReactMarkdown>
 			</div>
-
 			{snackbarComponent}
 		</div>
 	)

@@ -6,7 +6,12 @@ import { LoadingButton } from '@mui/lab'
 import { useOpenAI } from '../../services/OpenAiContext'
 import { useSnackbar } from '../common/useSnackbar'
 import type { IPrompt } from './types'
-import { defaultSystemPrompt, prompts } from './prompt'
+import {
+	defaultSystemPrompt,
+	generateUserPrompt,
+	prompts,
+	USER_PROMPT_SLOT
+} from './prompts'
 import ReactMarkdown from 'react-markdown'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs'
@@ -37,7 +42,9 @@ export default function FixedSystemPromptChat(): ReactElement {
 		try {
 			await openai.chatCompletion({
 				systemPrompts: [defaultSystemPrompt, selectedPrompt.systemPrompt],
-				userPrompt: text,
+				userPrompt: selectedPrompt.userPrompt
+					? generateUserPrompt(selectedPrompt.userPrompt, text)
+					: text,
 				onContent: (content: string): void => {
 					setAnswer(ans => ans + content)
 				},
@@ -56,6 +63,7 @@ export default function FixedSystemPromptChat(): ReactElement {
 		openSnackbar,
 		openai,
 		selectedPrompt.systemPrompt,
+		selectedPrompt.userPrompt,
 		text
 	])
 
@@ -128,11 +136,25 @@ export default function FixedSystemPromptChat(): ReactElement {
 						</LoadingButton>
 					</div>
 					<div className='p-3'>
+						<small>System Prompt</small>
 						<TextareaAutosize
 							value={selectedPrompt.systemPrompt}
 							onChange={handleSystemPromptChange}
 							className='w-[600px] rounded-xl border-gray-300'
 						/>
+						{selectedPrompt.userPrompt ? (
+							<>
+								<small>User Prompt</small>
+								<TextareaAutosize
+									value={generateUserPrompt(
+										selectedPrompt.userPrompt,
+										text || USER_PROMPT_SLOT
+									)}
+									readOnly
+									className='w-[600px] rounded-xl border-gray-300'
+								/>
+							</>
+						) : undefined}
 					</div>
 				</div>
 			</div>

@@ -22,7 +22,7 @@ export default function App(): ReactElement {
 						element={<EnglishCorrectnessCheckerPage />}
 					/>
 					<Route
-						path='/fixed-system-prompt-chat'
+						path='/fixed-system-prompt-chat/:id?/'
 						element={<FixedSystemPromptChatPage />}
 					/>
 				</Routes>

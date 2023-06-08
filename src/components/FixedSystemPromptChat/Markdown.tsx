@@ -11,7 +11,7 @@ export default function Markdown({
 }): ReactElement {
 	return (
 		<ReactMarkdown
-			className='prose'
+			className='prose max-w-none'
 			remarkPlugins={[remarkGfm]}
 			components={{
 				// eslint-disable-next-line react/no-unstable-nested-components

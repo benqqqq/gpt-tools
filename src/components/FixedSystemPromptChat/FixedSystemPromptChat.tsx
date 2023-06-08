@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { useCallback, useMemo, useState } from 'react'
 import Setting from '../common/Setting'
-import { Button, ButtonGroup, TextareaAutosize } from '@mui/material'
+import { Button, ButtonGroup } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import type { IChatCompletionMessage } from '../../services/OpenAiContext'
 import { useOpenAI } from '../../services/OpenAiContext'
@@ -14,8 +14,10 @@ import {
 	USER_PROMPT_SLOT
 } from './prompts'
 import Markdown from './Markdown'
+import TextareaAutosize from '../common/TextareaAutosize'
 
 const GPT_TEMPERATURE = 0.8
+const MAX_ROWS_WHEN_NOT_ACTIVE = 2
 
 interface IMessage extends IChatCompletionMessage {
 	timestamp: Date
@@ -160,6 +162,10 @@ export default function FixedSystemPromptChat(): ReactElement {
 		)
 	}, [])
 
+	const handleClearClick = useCallback((): void => {
+		setMessages([])
+	}, [])
+
 	return (
 		<div className='min-h-screen min-w-full bg-gray-100'>
 			<div className='bg-gray-800 p-3'>
@@ -192,26 +198,31 @@ export default function FixedSystemPromptChat(): ReactElement {
 							value={text}
 							onChange={handleTextChange}
 							onKeyDown={handleKeyDown}
-							className='w-[600px] rounded-xl border-gray-300'
+							className='w-[500px] rounded-xl border-gray-300'
 							autoFocus
-							maxRows={20}
+							maxRowsWhenNotActive={MAX_ROWS_WHEN_NOT_ACTIVE}
 						/>
-						<div className='w-2' />
-						<LoadingButton
-							variant='outlined'
-							type='submit'
-							onClick={handleSubmit}
-							loading={isSubmitting}
-						>
-							Submit
-						</LoadingButton>
+						<div className='m-2 flex h-[100px] w-[100px] flex-col justify-around'>
+							<LoadingButton
+								variant='contained'
+								type='submit'
+								onClick={handleSubmit}
+								loading={isSubmitting}
+							>
+								Submit
+							</LoadingButton>
+							<Button variant='outlined' onClick={handleClearClick}>
+								Clear
+							</Button>
+						</div>
 					</div>
 					<div className='p-3'>
 						<small>System Prompt</small>
 						<TextareaAutosize
 							value={selectedPrompt.systemPrompt}
 							onChange={handleSystemPromptChange}
-							className='w-[600px] rounded-xl border-gray-300'
+							className='w-[500px] rounded-xl border-gray-300'
+							maxRowsWhenNotActive={MAX_ROWS_WHEN_NOT_ACTIVE}
 						/>
 						{selectedPrompt.userPrompt ? (
 							<>
@@ -222,7 +233,8 @@ export default function FixedSystemPromptChat(): ReactElement {
 										text || USER_PROMPT_SLOT
 									)}
 									readOnly
-									className='w-[600px] rounded-xl border-gray-300'
+									className='w-[500px] rounded-xl border-gray-300'
+									maxRowsWhenNotActive={MAX_ROWS_WHEN_NOT_ACTIVE}
 								/>
 							</>
 						) : undefined}

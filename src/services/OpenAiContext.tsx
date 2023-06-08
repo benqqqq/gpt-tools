@@ -5,7 +5,7 @@ import type { ISettingContext } from './SettingContext'
 import { useSettingContext } from './SettingContext'
 import { createParser } from 'eventsource-parser'
 
-const GPT_TEMPERATURE = 0
+const GPT_DEFAULT_TEMPERATURE = 0
 
 interface IOpenAiApi {
 	chatCompletion: (options: IChatCompletionOptions) => Promise<void>
@@ -16,6 +16,7 @@ interface IChatCompletionOptions {
 	userPrompt: string
 	onContent: (content: string) => void
 	onFinish: () => void
+	temperature?: number
 }
 
 interface IChatCompletionData {
@@ -36,7 +37,13 @@ const defaultOpenAiApi: IOpenAiApi = {
 
 const chatCompletion = async (
 	apiKey: string,
-	{ systemPrompts, userPrompt, onContent, onFinish }: IChatCompletionOptions
+	{
+		systemPrompts,
+		userPrompt,
+		onContent,
+		onFinish,
+		temperature = GPT_DEFAULT_TEMPERATURE
+	}: IChatCompletionOptions
 ): Promise<void> => {
 	const resp = await fetch('https://api.openai.com/v1/chat/completions', {
 		method: 'POST',
@@ -56,7 +63,7 @@ const chatCompletion = async (
 					content: userPrompt
 				}
 			],
-			temperature: GPT_TEMPERATURE,
+			temperature,
 			stream: true
 		})
 	})

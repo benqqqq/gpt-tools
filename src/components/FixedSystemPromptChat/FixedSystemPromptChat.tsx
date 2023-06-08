@@ -17,6 +17,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter'
 import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 import remarkGfm from 'remark-gfm'
 
+const GPT_TEMPERATURE = 0.8
 export default function FixedSystemPromptChat(): ReactElement {
 	const [text, setText] = useState('')
 	const [isSubmitting, setIsSubmitting] = useState(false)
@@ -51,7 +52,8 @@ export default function FixedSystemPromptChat(): ReactElement {
 				onFinish: (): void => {
 					setIsSubmitting(false)
 					openSnackbar('Finish', 'success')
-				}
+				},
+				temperature: GPT_TEMPERATURE
 			})
 		} catch (error) {
 			openSnackbar((error as Error).message, 'error')
@@ -122,8 +124,9 @@ export default function FixedSystemPromptChat(): ReactElement {
 							value={text}
 							onChange={handleTextChange}
 							onKeyDown={handleKeyDown}
-							className='w-96 rounded-xl border-gray-300'
+							className='w-[600px] rounded-xl border-gray-300'
 							autoFocus
+							maxRows={20}
 						/>
 						<div className='w-2' />
 						<LoadingButton

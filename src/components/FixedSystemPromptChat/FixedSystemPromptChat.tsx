@@ -1,30 +1,50 @@
 import type { ReactElement } from 'react'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import Setting from '../common/Setting'
 import { Button, ButtonGroup, TextareaAutosize } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
+import type { IChatCompletionMessage } from '../../services/OpenAiContext'
 import { useOpenAI } from '../../services/OpenAiContext'
 import { useSnackbar } from '../common/useSnackbar'
 import type { IPrompt } from './types'
 import {
-	defaultSystemPrompt,
+	assistantOutputHint,
 	generateUserPrompt,
 	prompts,
 	USER_PROMPT_SLOT
 } from './prompts'
-import ReactMarkdown from 'react-markdown'
-import SyntaxHighlighter from 'react-syntax-highlighter'
-import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs'
-import remarkGfm from 'remark-gfm'
+import Markdown from './Markdown'
 
 const GPT_TEMPERATURE = 0.8
+
+interface IMessage extends IChatCompletionMessage {
+	timestamp: Date
+	id: number
+}
+
+const DEFAULT_COUNTER_STEP = 1
+const generateCounter = (
+	start = 0,
+	step = DEFAULT_COUNTER_STEP
+): { assign: () => number } => {
+	let current = start
+	return {
+		assign: (): number => {
+			const value = current
+			current += step
+			return value
+		}
+	}
+}
+
 export default function FixedSystemPromptChat(): ReactElement {
 	const [text, setText] = useState('')
 	const [isSubmitting, setIsSubmitting] = useState(false)
-	const [answer, setAnswer] = useState('')
 	const openai = useOpenAI()
 	const [openSnackbar, closeSnackbar, snackbarComponent] = useSnackbar()
 	const [selectedPrompt, setSelectedPrompt] = useState<IPrompt>(prompts[0])
+	const [messages, setMessages] = useState<IMessage[]>([])
+	const counter = useMemo(() => generateCounter(0), [])
 
 	const handleTextChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement>): void => {
@@ -37,17 +57,57 @@ export default function FixedSystemPromptChat(): ReactElement {
 		if (isSubmitting) {
 			return
 		}
-		setAnswer('')
 		setIsSubmitting(true)
 		closeSnackbar()
+		setText('')
+
+		const newUserPrompt = selectedPrompt.userPrompt
+			? generateUserPrompt(selectedPrompt.userPrompt, text)
+			: text
+
+		setMessages([
+			...messages,
+			{
+				id: counter.assign(),
+				role: 'user',
+				content: newUserPrompt,
+				timestamp: new Date()
+			},
+			{
+				id: counter.assign(),
+				role: 'assistant',
+				content: '',
+				timestamp: new Date()
+			}
+		])
+
 		try {
 			await openai.chatCompletion({
-				systemPrompts: [defaultSystemPrompt, selectedPrompt.systemPrompt],
-				userPrompt: selectedPrompt.userPrompt
-					? generateUserPrompt(selectedPrompt.userPrompt, text)
-					: text,
+				messages: [
+					{
+						role: 'system',
+						content: selectedPrompt.systemPrompt
+					},
+					...messages.map(({ role, content }) => ({ role, content })),
+					{
+						role: 'user',
+						content: `${newUserPrompt}\n\n${assistantOutputHint}`
+					}
+				],
 				onContent: (content: string): void => {
-					setAnswer(ans => ans + content)
+					const LATEST = -1
+					setMessages((previousMessages): IMessage[] => {
+						const latestMessage = previousMessages.at(LATEST) as IMessage
+						return [
+							...previousMessages.slice(0, LATEST),
+							{
+								id: latestMessage.id,
+								role: 'assistant',
+								content: latestMessage.content + content,
+								timestamp: new Date()
+							}
+						]
+					})
 				},
 				onFinish: (): void => {
 					setIsSubmitting(false)
@@ -61,7 +121,9 @@ export default function FixedSystemPromptChat(): ReactElement {
 		}
 	}, [
 		closeSnackbar,
+		counter,
 		isSubmitting,
+		messages,
 		openSnackbar,
 		openai,
 		selectedPrompt.systemPrompt,
@@ -91,6 +153,12 @@ export default function FixedSystemPromptChat(): ReactElement {
 		},
 		[]
 	)
+
+	const handleMessageDeleteClick = useCallback((messageId: number) => {
+		setMessages(previousMessage =>
+			previousMessage.filter(message => message.id !== messageId)
+		)
+	}, [])
 
 	return (
 		<div className='min-h-screen min-w-full bg-gray-100'>
@@ -161,60 +229,30 @@ export default function FixedSystemPromptChat(): ReactElement {
 					</div>
 				</div>
 			</div>
-			<div className='bg-white px-14 py-3'>
-				<ReactMarkdown
-					remarkPlugins={[remarkGfm]}
-					components={{
-						// eslint-disable-next-line react/no-unstable-nested-components
-						code({
-							node,
-							inline,
-							// eslint-disable-next-line unicorn/no-keyword-prefix
-							className,
-							children,
-							...properties
-						}): ReactElement {
-							// eslint-disable-next-line unicorn/no-keyword-prefix
-							const match = /language-(\w+)/.exec(className ?? '')
-							const matchIndex = 1
-							return !inline && match ? (
-								<SyntaxHighlighter
-									/* eslint-disable-next-line react/jsx-props-no-spreading */
-									{...properties}
-									/* eslint-disable-next-line react/no-children-prop */
-									children={String(children).replace(/\n$/, '')}
-									style={docco}
-									language={match[matchIndex]}
-									PreTag='div'
-									className='m-4 rounded-xl border-gray-300'
-								/>
-							) : (
-								// eslint-disable-next-line react/jsx-props-no-spreading,unicorn/no-keyword-prefix
-								<code {...properties} className={className}>
-									{children}
-								</code>
-							)
-						},
-						// eslint-disable-next-line react/no-unstable-nested-components,unicorn/no-keyword-prefix
-						li({ children, ordered, className, ...properties }): ReactElement {
-							return (
-								<li
-									/* eslint-disable-next-line unicorn/no-keyword-prefix */
-									className={`${className ?? ''} ${
-										ordered ? ' list-decimal' : 'list-disc'
-									}`}
-									/* eslint-disable-next-line react/jsx-props-no-spreading */
-									{...properties}
-								>
-									{children}
-								</li>
-							)
-						}
-					}}
+			{[...messages].reverse().map(message => (
+				<div
+					key={message.id}
+					className={`px-14 py-3 ${
+						message.role === 'user' ? 'bg-amber-50' : 'bg-green-50'
+					}`}
 				>
-					{answer}
-				</ReactMarkdown>
-			</div>
+					<Markdown
+						content={
+							message.role === 'assistant' && message.content === ''
+								? 'Thinking ...'
+								: message.content
+						}
+					/>
+					<Button
+						variant='outlined'
+						className='m-3'
+						onClick={(): void => handleMessageDeleteClick(message.id)}
+					>
+						Delete
+					</Button>
+				</div>
+			))}
+			<div className='h-[300px] w-full' />
 			{snackbarComponent}
 		</div>
 	)

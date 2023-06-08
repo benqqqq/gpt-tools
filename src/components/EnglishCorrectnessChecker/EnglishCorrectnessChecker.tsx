@@ -46,8 +46,16 @@ export default function EnglishCorrectnessChecker(): ReactElement {
 		closeSnackbar()
 		try {
 			await openai.chatCompletion({
-				systemPrompts: [englishTeacherSystemPromptInJsonLines],
-				userPrompt: generateUserPrompt(englishTeacherUserPrompt, text),
+				messages: [
+					{
+						role: 'system',
+						content: englishTeacherSystemPromptInJsonLines
+					},
+					{
+						role: 'user',
+						content: generateUserPrompt(englishTeacherUserPrompt, text)
+					}
+				],
 				onContent: (content: string): void => {
 					setAnswer(ans => ans + content)
 				},

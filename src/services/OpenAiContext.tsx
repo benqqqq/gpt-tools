@@ -12,8 +12,7 @@ interface IOpenAiApi {
 }
 
 interface IChatCompletionOptions {
-	systemPrompts: string[]
-	userPrompt: string
+	messages: IChatCompletionMessage[]
 	onContent: (content: string) => void
 	onFinish: () => void
 	temperature?: number
@@ -35,11 +34,15 @@ const defaultOpenAiApi: IOpenAiApi = {
 	chatCompletion: apiNotReady
 }
 
+export interface IChatCompletionMessage {
+	role: 'assistant' | 'system' | 'user'
+	content: string
+}
+
 const chatCompletion = async (
 	apiKey: string,
 	{
-		systemPrompts,
-		userPrompt,
+		messages,
 		onContent,
 		onFinish,
 		temperature = GPT_DEFAULT_TEMPERATURE
@@ -53,16 +56,7 @@ const chatCompletion = async (
 		},
 		body: JSON.stringify({
 			model: 'gpt-3.5-turbo',
-			messages: [
-				...systemPrompts.map(systemPrompt => ({
-					role: 'system',
-					content: systemPrompt
-				})),
-				{
-					role: 'user',
-					content: userPrompt
-				}
-			],
+			messages,
 			temperature,
 			stream: true
 		})

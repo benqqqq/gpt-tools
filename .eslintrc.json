@@ -164,7 +164,8 @@
 				}
 			}
 		],
-		"unicorn/no-nested-ternary": ["error"]
+		"unicorn/no-nested-ternary": ["error"],
+		"unicorn/no-keyword-prefix": ["off"]
 	},
 	"settings": {
 		"react": {

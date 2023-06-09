@@ -2,29 +2,16 @@ import type { ReactElement } from 'react'
 import { useCallback, useMemo, useState } from 'react'
 import Setting from '../common/Setting'
 import { Button, ButtonGroup } from '@mui/material'
-import { LoadingButton } from '@mui/lab'
-import type { IChatCompletionMessage } from '../../services/OpenAiContext'
 import { useOpenAI } from '../../services/OpenAiContext'
 import { useSnackbar } from '../common/useSnackbar'
-import type { IPrompt } from './types'
-import {
-	assistantOutputHint,
-	generateUserPrompt,
-	prompts,
-	USER_PROMPT_SLOT
-} from './prompts'
-import Markdown from './Markdown'
-import TextareaAutosize from '../common/TextareaAutosize'
+import type { IMessage, IPrompt } from './types'
+import { assistantOutputHint, generateUserPrompt, prompts } from './prompts'
 import { useNavigate, useParams } from 'react-router-dom'
 import Head from '../common/Head'
+import Message from './Message'
+import PromptChatBox from './PromptChatBox'
 
 const GPT_TEMPERATURE = 0.8
-const MAX_ROWS_WHEN_NOT_ACTIVE = 2
-
-interface IMessage extends IChatCompletionMessage {
-	timestamp: Date
-	id: number
-}
 
 const DEFAULT_COUNTER_STEP = 1
 const generateCounter = (
@@ -42,7 +29,6 @@ const generateCounter = (
 }
 
 export default function FixedSystemPromptChat(): ReactElement {
-	const [text, setText] = useState('')
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const openai = useOpenAI()
 	const [openSnackbar, closeSnackbar, snackbarComponent] = useSnackbar()
@@ -55,98 +41,82 @@ export default function FixedSystemPromptChat(): ReactElement {
 	const counter = useMemo(() => generateCounter(0), [])
 	const navigate = useNavigate()
 
-	const handleTextChange = useCallback(
-		(event: React.ChangeEvent<HTMLTextAreaElement>): void => {
-			setText(event.target.value)
-		},
-		[]
-	)
-
-	const handleSubmit = useCallback(async (): Promise<void> => {
-		if (isSubmitting) {
-			return
-		}
-		setIsSubmitting(true)
-		closeSnackbar()
-		setText('')
-
-		const newUserPrompt = selectedPrompt.userPrompt
-			? generateUserPrompt(selectedPrompt.userPrompt, text)
-			: text
-
-		setMessages([
-			...messages,
-			{
-				id: counter.assign(),
-				role: 'user',
-				content: newUserPrompt,
-				timestamp: new Date()
-			},
-			{
-				id: counter.assign(),
-				role: 'assistant',
-				content: '',
-				timestamp: new Date()
+	const handleSubmit = useCallback(
+		async (userPrompt: string, systemPrompt: string): Promise<void> => {
+			if (isSubmitting) {
+				return
 			}
-		])
+			setIsSubmitting(true)
+			closeSnackbar()
 
-		try {
-			await openai.chatCompletion({
-				messages: [
-					{
-						role: 'system',
-						content: selectedPrompt.systemPrompt
+			const newUserPrompt = selectedPrompt.userPrompt
+				? generateUserPrompt(selectedPrompt.userPrompt, userPrompt)
+				: userPrompt
+
+			setMessages([
+				...messages,
+				{
+					id: counter.assign(),
+					role: 'user',
+					content: newUserPrompt,
+					timestamp: new Date()
+				},
+				{
+					id: counter.assign(),
+					role: 'assistant',
+					content: '',
+					timestamp: new Date()
+				}
+			])
+
+			try {
+				await openai.chatCompletion({
+					messages: [
+						{
+							role: 'system',
+							content: systemPrompt
+						},
+						...messages.map(({ role, content }) => ({ role, content })),
+						{
+							role: 'user',
+							content: `${newUserPrompt}\n\n${assistantOutputHint}`
+						}
+					],
+					onContent: (content: string): void => {
+						const LATEST = -1
+						setMessages((previousMessages): IMessage[] => {
+							const latestMessage = previousMessages.at(LATEST) as IMessage
+							return [
+								...previousMessages.slice(0, LATEST),
+								{
+									id: latestMessage.id,
+									role: 'assistant',
+									content: latestMessage.content + content,
+									timestamp: new Date()
+								}
+							]
+						})
 					},
-					...messages.map(({ role, content }) => ({ role, content })),
-					{
-						role: 'user',
-						content: `${newUserPrompt}\n\n${assistantOutputHint}`
-					}
-				],
-				onContent: (content: string): void => {
-					const LATEST = -1
-					setMessages((previousMessages): IMessage[] => {
-						const latestMessage = previousMessages.at(LATEST) as IMessage
-						return [
-							...previousMessages.slice(0, LATEST),
-							{
-								id: latestMessage.id,
-								role: 'assistant',
-								content: latestMessage.content + content,
-								timestamp: new Date()
-							}
-						]
-					})
-				},
-				onFinish: (): void => {
-					setIsSubmitting(false)
-					openSnackbar('Finish', 'success')
-				},
-				temperature: GPT_TEMPERATURE
-			})
-		} catch (error) {
-			openSnackbar((error as Error).message, 'error')
-			setIsSubmitting(false)
-		}
-	}, [
-		closeSnackbar,
-		counter,
-		isSubmitting,
-		messages,
-		openSnackbar,
-		openai,
-		selectedPrompt.systemPrompt,
-		selectedPrompt.userPrompt,
-		text
-	])
-
-	const handleKeyDown = useCallback(
-		(event: React.KeyboardEvent) => {
-			if (event.metaKey && event.key === 'Enter') {
-				void handleSubmit()
+					onFinish: (): void => {
+						setIsSubmitting(false)
+						openSnackbar('Finish', 'success')
+					},
+					temperature: GPT_TEMPERATURE
+				})
+			} catch (error) {
+				openSnackbar((error as Error).message, 'error')
+				setIsSubmitting(false)
 			}
 		},
-		[handleSubmit]
+		[
+			closeSnackbar,
+			counter,
+			isSubmitting,
+			messages,
+			openSnackbar,
+			openai,
+			selectedPrompt.userPrompt
+		]
 	)
 
 	const handlePromptSelected = useCallback(
@@ -155,16 +125,6 @@ export default function FixedSystemPromptChat(): ReactElement {
 			navigate(`/fixed-system-prompt-chat/${prompts.indexOf(prompt)}/`)
 		},
 		[navigate]
-	)
-
-	const handleSystemPromptChange = useCallback(
-		(event: React.ChangeEvent<HTMLTextAreaElement>): void => {
-			setSelectedPrompt(previousPrompt => ({
-				...previousPrompt,
-				systemPrompt: event.target.value
-			}))
-		},
-		[]
 	)
 
 	const handleMessageDeleteClick = useCallback((messageId: number) => {
@@ -206,77 +166,19 @@ export default function FixedSystemPromptChat(): ReactElement {
 					</ButtonGroup>
 				</div>
 				<div className='w-[800px] p-3'>
-					<div className='flex'>
-						<div className='flex items-center'>
-							<TextareaAutosize
-								value={text}
-								onChange={handleTextChange}
-								onKeyDown={handleKeyDown}
-								className='w-[500px] rounded-xl border-gray-300'
-								autoFocus
-								maxRowsWhenNotActive={MAX_ROWS_WHEN_NOT_ACTIVE}
-							/>
-							<div className='m-2 flex h-[100px] w-[100px] flex-col justify-around'>
-								<LoadingButton
-									variant='contained'
-									type='submit'
-									onClick={handleSubmit}
-									loading={isSubmitting}
-								>
-									Submit
-								</LoadingButton>
-								<Button variant='outlined' onClick={handleClearClick}>
-									Clear
-								</Button>
-							</div>
-						</div>
-						<div className='p-3'>
-							<small>System Prompt</small>
-							<TextareaAutosize
-								value={selectedPrompt.systemPrompt}
-								onChange={handleSystemPromptChange}
-								className='w-[500px] rounded-xl border-gray-300'
-								maxRowsWhenNotActive={MAX_ROWS_WHEN_NOT_ACTIVE}
-							/>
-							{selectedPrompt.userPrompt ? (
-								<>
-									<small>User Prompt</small>
-									<TextareaAutosize
-										value={generateUserPrompt(
-											selectedPrompt.userPrompt,
-											text || USER_PROMPT_SLOT
-										)}
-										readOnly
-										className='w-[500px] rounded-xl border-gray-300'
-										maxRowsWhenNotActive={MAX_ROWS_WHEN_NOT_ACTIVE}
-									/>
-								</>
-							) : undefined}
-						</div>
-					</div>
+					<PromptChatBox
+						selectedPrompt={selectedPrompt}
+						isSubmitting={isSubmitting}
+						onClear={handleClearClick}
+						onSubmit={handleSubmit}
+					/>
 				</div>
 				{[...messages].reverse().map(message => (
-					<div
+					<Message
 						key={message.id}
-						className={`px-14 py-3 ${
-							message.role === 'user' ? 'bg-amber-50' : 'bg-green-50'
-						}`}
-					>
-						<Markdown
-							content={
-								message.role === 'assistant' && message.content === ''
-									? 'Thinking ...'
-									: message.content
-							}
-						/>
-						<Button
-							variant='outlined'
-							className='m-3'
-							onClick={(): void => handleMessageDeleteClick(message.id)}
-						>
-							Delete
-						</Button>
-					</div>
+						message={message}
+						onDeleteMessage={handleMessageDeleteClick}
+					/>
 				))}
 				<div className='h-[300px] w-full' />
 				{snackbarComponent}

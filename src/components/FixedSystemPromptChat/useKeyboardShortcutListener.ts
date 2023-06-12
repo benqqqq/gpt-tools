@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 
 interface IBinding {
 	onCmdK?: () => void
+	onCmdJ?: () => void
 }
 
 export default function useKeyboardShortcutListener(binding: IBinding): void {
@@ -9,6 +10,9 @@ export default function useKeyboardShortcutListener(binding: IBinding): void {
 		const handleKeyDown = (event: KeyboardEvent): void => {
 			if (event.metaKey && event.key === 'k') {
 				binding.onCmdK?.()
+			}
+			if (event.metaKey && event.key === 'j') {
+				binding.onCmdJ?.()
 			}
 		}
 

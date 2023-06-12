@@ -1,7 +1,6 @@
 import type { ReactElement } from 'react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import Setting from '../common/Setting'
-import { Button, ButtonGroup } from '@mui/material'
 import { useOpenAI } from '../../services/OpenAiContext'
 import { useSnackbar } from '../common/useSnackbar'
 import type { IMessage, IPrompt } from './types'
@@ -129,22 +128,19 @@ export default function FixedSystemPromptChat(): ReactElement {
 		[navigate]
 	)
 
-	const handlePromptButtonGroupClick = useCallback(
-		(prompt: IPrompt): void => {
-			selectPrompt(prompt)
-		},
-		[selectPrompt]
-	)
-
 	const handleMessageDeleteClick = useCallback((messageId: number) => {
 		setMessages(previousMessage =>
 			previousMessage.filter(message => message.id !== messageId)
 		)
 	}, [])
 
-	const handleClearClick = useCallback((): void => {
+	const clearMessages = useCallback(() => {
 		setMessages([])
 	}, [])
+
+	const handleClearClick = useCallback((): void => {
+		clearMessages()
+	}, [clearMessages])
 
 	const userPromptRef = useRef<HTMLTextAreaElement>(null)
 
@@ -168,65 +164,62 @@ export default function FixedSystemPromptChat(): ReactElement {
 			() => ({
 				onCmdK: (): void => {
 					promptSearchRef.current?.focus()
+				},
+				onCmdJ: (): void => {
+					clearMessages()
 				}
 			}),
-			[]
+			[clearMessages]
 		)
 	)
 
 	return (
-		<>
+		<div className='flex w-full'>
 			<Head title={`${selectedPrompt.key} | Fixed System Prompt Chat`} />
 
-			<div className='min-h-screen min-w-full bg-gray-100'>
-				<div className='flex items-center justify-between bg-gray-800 p-3'>
-					<h1 className='text-xl font-bold text-green-200'>
-						Fixed System Prompt Chat
+			{/* Header */}
+			<div className='flex h-screen w-[250px] flex-col items-start bg-gray-800 p-3'>
+				<div className='my-5'>
+					<h1 className='m-0 text-xl font-bold text-green-200'>
+						Role based Chat
 					</h1>
-					<div className='rounded-lg bg-white p-1'>
-						<Setting />
-					</div>
-					<div className='rounded-lg bg-white'>
-						<PromptSearchCombobox
-							onSelect={handlePromptSearchSelect}
-							ref={promptSearchRef}
-						/>
-					</div>
+					<strong className='text-amber-100'>- {selectedPrompt.key}</strong>
 				</div>
-				<div className='bg-gray-100 p-3'>
-					<ButtonGroup color='secondary'>
-						{prompts.map(prompt => (
-							<Button
-								key={prompt.key}
-								onClick={(): void => handlePromptButtonGroupClick(prompt)}
-								variant={
-									selectedPrompt.key === prompt.key ? 'contained' : 'outlined'
-								}
-							>
-								{prompt.key}
-							</Button>
-						))}
-					</ButtonGroup>
+				<div className='my-5 rounded-lg bg-white p-1'>
+					<Setting />
 				</div>
-				<div className='w-[800px] p-3'>
-					<PromptChatBox
-						selectedPrompt={selectedPrompt}
-						isSubmitting={isSubmitting}
-						onClear={handleClearClick}
-						onSubmit={handleSubmit}
-						userPromptInputRef={userPromptRef}
+				<div className='my-5 rounded-lg bg-white'>
+					<PromptSearchCombobox
+						onSelect={handlePromptSearchSelect}
+						ref={promptSearchRef}
 					/>
 				</div>
-				{[...messages].reverse().map(message => (
-					<Message
-						key={message.id}
-						message={message}
-						onDeleteMessage={handleMessageDeleteClick}
-					/>
-				))}
-				<div className='h-[300px] w-full' />
-				{snackbarComponent}
 			</div>
-		</>
+
+			{/* Messages */}
+			<div className='flex h-screen flex-grow flex-col-reverse overflow-y-auto bg-gray-100 pb-[125px]'>
+				<div>
+					{messages.map(message => (
+						<Message
+							key={message.id}
+							message={message}
+							onDeleteMessage={handleMessageDeleteClick}
+						/>
+					))}
+				</div>
+			</div>
+
+			{/* Prompt */}
+			<div className='fixed bottom-0 w-full bg-white p-3'>
+				<PromptChatBox
+					selectedPrompt={selectedPrompt}
+					isSubmitting={isSubmitting}
+					onClear={handleClearClick}
+					onSubmit={handleSubmit}
+					userPromptInputRef={userPromptRef}
+				/>
+			</div>
+			{snackbarComponent}
+		</div>
 	)
 }

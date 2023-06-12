@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import Setting from '../common/Setting'
 import { Button, ButtonGroup } from '@mui/material'
 import { useOpenAI } from '../../services/OpenAiContext'
@@ -10,6 +10,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import Head from '../common/Head'
 import Message from './Message'
 import PromptChatBox from './PromptChatBox'
+import PromptSearchCombobox from './PromptSearchCombobox'
+import useKeyboardShortcutListener from './useKeyboardShortcutListener'
 
 const GPT_TEMPERATURE = 0.8
 
@@ -119,12 +121,19 @@ export default function FixedSystemPromptChat(): ReactElement {
 		]
 	)
 
-	const handlePromptSelected = useCallback(
+	const selectPrompt = useCallback(
 		(prompt: IPrompt): void => {
 			setSelectedPrompt(prompt)
 			navigate(`/fixed-system-prompt-chat/${prompts.indexOf(prompt)}/`)
 		},
 		[navigate]
+	)
+
+	const handlePromptButtonGroupClick = useCallback(
+		(prompt: IPrompt): void => {
+			selectPrompt(prompt)
+		},
+		[selectPrompt]
 	)
 
 	const handleMessageDeleteClick = useCallback((messageId: number) => {
@@ -137,25 +146,59 @@ export default function FixedSystemPromptChat(): ReactElement {
 		setMessages([])
 	}, [])
 
+	const userPromptRef = useRef<HTMLTextAreaElement>(null)
+
+	const handlePromptSearchSelect = useCallback(
+		(promptKey: string) => {
+			const prompt = prompts.find(p => p.key === promptKey)
+			if (prompt) {
+				selectPrompt(prompt)
+				userPromptRef.current?.focus()
+			} else {
+				openSnackbar(`Prompt ${promptKey} not found`, 'error')
+			}
+		},
+		[openSnackbar, selectPrompt]
+	)
+
+	const promptSearchRef = useRef<HTMLInputElement>(null)
+
+	useKeyboardShortcutListener(
+		useMemo(
+			() => ({
+				onCmdK: (): void => {
+					promptSearchRef.current?.focus()
+				}
+			}),
+			[]
+		)
+	)
+
 	return (
 		<>
 			<Head title={`${selectedPrompt.key} | Fixed System Prompt Chat`} />
 
 			<div className='min-h-screen min-w-full bg-gray-100'>
-				<div className='bg-gray-800 p-3'>
+				<div className='flex items-center justify-between bg-gray-800 p-3'>
 					<h1 className='text-xl font-bold text-green-200'>
 						Fixed System Prompt Chat
 					</h1>
-				</div>
-				<div className='bg-gray-200 p-3'>
-					<Setting />
+					<div className='rounded-lg bg-white p-1'>
+						<Setting />
+					</div>
+					<div className='rounded-lg bg-white'>
+						<PromptSearchCombobox
+							onSelect={handlePromptSearchSelect}
+							ref={promptSearchRef}
+						/>
+					</div>
 				</div>
 				<div className='bg-gray-100 p-3'>
 					<ButtonGroup color='secondary'>
 						{prompts.map(prompt => (
 							<Button
 								key={prompt.key}
-								onClick={(): void => handlePromptSelected(prompt)}
+								onClick={(): void => handlePromptButtonGroupClick(prompt)}
 								variant={
 									selectedPrompt.key === prompt.key ? 'contained' : 'outlined'
 								}
@@ -171,6 +214,7 @@ export default function FixedSystemPromptChat(): ReactElement {
 						isSubmitting={isSubmitting}
 						onClear={handleClearClick}
 						onSubmit={handleSubmit}
+						userPromptInputRef={userPromptRef}
 					/>
 				</div>
 				{[...messages].reverse().map(message => (

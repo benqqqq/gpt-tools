@@ -11,6 +11,10 @@ const config = {
 		}
 	},
 	experimental: { optimizeUniversalDefaults: true },
-	plugins: [formsPlugin, typographyPlugin]
+	plugins: [formsPlugin, typographyPlugin],
+	corePlugins: {
+		preflight: false
+	},
+	important: '#root'
 }
 module.exports = config

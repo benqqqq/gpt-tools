@@ -4,21 +4,28 @@ import {
 	defaultSettingContext,
 	useSettingContext
 } from '../../services/SettingContext'
-import { Checkbox, FormControlLabel, FormGroup, TextField } from '@mui/material'
+import {
+	Button,
+	Checkbox,
+	FormControlLabel,
+	FormGroup,
+	TextField
+} from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 
 export default function Setting(): ReactElement {
 	const settingContext = useSettingContext()
 	const [setting, setSetting] = useState(defaultSettingContext.setting)
 	const [isShowKey, setIsShowKey] = useState(false)
+	const [isShow, setIsShow] = useState(false)
 
 	useEffect(() => {
 		setSetting(settingContext.setting)
 	}, [settingContext.setting])
 
-	const handleSave = useCallback(async () => {
+	const handleSaveClick = useCallback(async () => {
 		const simulateDelayMs = 1000
-		settingContext.storeSetting('openaiApiKey', setting.openaiApiKey, {
+		await settingContext.storeSetting('openaiApiKey', setting.openaiApiKey, {
 			simulateDelayMs
 		})
 	}, [settingContext, setting])
@@ -34,7 +41,11 @@ export default function Setting(): ReactElement {
 		setIsShowKey(k => !k)
 	}, [])
 
-	return (
+	const handleEditSettingClick = useCallback(() => {
+		setIsShow(true)
+	}, [])
+
+	return isShow ? (
 		<div className='flex w-96 items-center justify-around'>
 			<TextField
 				label='OpenAI API Key'
@@ -55,12 +66,14 @@ export default function Setting(): ReactElement {
 			<LoadingButton
 				variant='outlined'
 				size='small'
-				onClick={handleSave}
+				onClick={handleSaveClick}
 				loading={settingContext.isLoading}
 				loadingIndicator='Saving...'
 			>
 				Save
 			</LoadingButton>
 		</div>
+	) : (
+		<Button onClick={handleEditSettingClick}>Edit Setting</Button>
 	)
 }

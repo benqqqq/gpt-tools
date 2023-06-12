@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import type { ReactElement, Ref } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import TextareaAutosize from '../common/TextareaAutosize'
 import { LoadingButton } from '@mui/lab'
@@ -11,6 +11,7 @@ interface IPromptChatBoxProperties {
 	onClear: () => void
 	isSubmitting: boolean
 	selectedPrompt: IPrompt
+	userPromptInputRef?: Ref<HTMLTextAreaElement>
 }
 
 const MAX_ROWS_WHEN_NOT_ACTIVE = 2
@@ -19,7 +20,8 @@ export default function PromptChatBox({
 	onSubmit,
 	onClear,
 	isSubmitting,
-	selectedPrompt
+	selectedPrompt,
+	userPromptInputRef
 }: IPromptChatBoxProperties): ReactElement {
 	const [userPrompt, setUserPrompt] = useState('')
 	const [systemPrompt, setSystemPrompt] = useState('')
@@ -73,6 +75,7 @@ export default function PromptChatBox({
 					className='w-[500px] rounded-xl border-gray-300'
 					autoFocus
 					maxRowsWhenNotActive={MAX_ROWS_WHEN_NOT_ACTIVE}
+					ref={userPromptInputRef}
 				/>
 				<div className='m-2 flex h-[100px] w-[100px] flex-col justify-around'>
 					<LoadingButton
@@ -113,4 +116,8 @@ export default function PromptChatBox({
 			</div>
 		</div>
 	)
+}
+
+PromptChatBox.defaultProps = {
+	userPromptInputRef: undefined
 }

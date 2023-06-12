@@ -22,7 +22,7 @@ export interface ISettingContext {
 		options?: {
 			simulateDelayMs?: number
 		}
-	) => void
+	) => Promise<void>
 }
 
 export const defaultSettingContext: ISettingContext = {
@@ -30,7 +30,7 @@ export const defaultSettingContext: ISettingContext = {
 		openaiApiKey: ''
 	},
 	isLoading: false,
-	storeSetting: () => void 0
+	storeSetting: async () => {}
 }
 
 const SettingContext = createContext<ISettingContext>(defaultSettingContext)
@@ -84,14 +84,17 @@ export function SettingProvider({
 				})
 			}
 
-			if (simulateDelayMs > 0) {
-				setTimeout(
-					() => setIsLoading(false),
-					Math.max(0, startTimeInMs + simulateDelayMs - performance.now())
-				)
-			} else {
-				setIsLoading(false)
-			}
+			return new Promise<void>(resolve => {
+				if (simulateDelayMs > 0) {
+					setTimeout(() => {
+						setIsLoading(false)
+						resolve()
+					}, Math.max(0, startTimeInMs + simulateDelayMs - performance.now()))
+				} else {
+					setIsLoading(false)
+					resolve()
+				}
+			})
 		},
 		[]
 	)

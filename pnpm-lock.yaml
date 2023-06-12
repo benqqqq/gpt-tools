@@ -34,6 +34,9 @@ dependencies:
   js-yaml:
     specifier: ^4.1.0
     version: 4.1.0
+  match-sorter:
+    specifier: ^6.3.1
+    version: 6.3.1
   react:
     specifier: 18.2.0
     version: 18.2.0
@@ -9074,6 +9077,16 @@ packages:
       }
     dev: false
 
+  /match-sorter@6.3.1:
+    resolution:
+      {
+        integrity: sha512-mxybbo3pPNuA+ZuCUhm5bwNkXrJTbsk5VWbR5wiwz/GC6LIiegBGn2w3O08UG/jdbYLinw51fSQ5xNU1U3MgBw==
+      }
+    dependencies:
+      '@babel/runtime': 7.21.5
+      remove-accents: 0.4.2
+    dev: false
+
   /mathml-tag-names@2.1.3:
     resolution:
       {
@@ -11240,6 +11253,13 @@ packages:
       '@types/mdast': 3.0.11
       mdast-util-to-hast: 12.3.0
       unified: 10.1.2
+    dev: false
+
+  /remove-accents@0.4.2:
+    resolution:
+      {
+        integrity: sha512-7pXIJqJOq5tFgG1A2Zxti3Ht8jJF337m4sowbuHsW30ZnkQFnDzy9qBNhgzX8ZLW4+UBcXiiR7SwR6pokHsxiA==
+      }
     dev: false
 
   /request-progress@3.0.0:

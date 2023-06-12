@@ -2,6 +2,7 @@ import LoadingOrError from 'components/common/LoadingOrError'
 import type { ReactElement } from 'react'
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { CssBaseline } from '@mui/material'
 
 const HomePage = lazy(async () => import('pages/HomePage'))
 const EnglishCorrectnessCheckerPage = lazy(
@@ -14,6 +15,7 @@ const FixedSystemPromptChatPage = lazy(
 export default function App(): ReactElement {
 	return (
 		<BrowserRouter>
+			<CssBaseline />
 			<Suspense fallback={<LoadingOrError />}>
 				<Routes>
 					<Route path='/' element={<HomePage />} />

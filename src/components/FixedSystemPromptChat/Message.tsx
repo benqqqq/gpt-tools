@@ -38,24 +38,28 @@ function Message({
 						: message.content
 				}
 			/>
-			<Button
-				variant='outlined'
-				className='m-3'
-				onClick={(): void => handleMessageDeleteClick(message.id)}
-				disabled={isSubmitting}
-			>
-				Delete
-			</Button>
-			{message.error ? (
+			<div className='flex items-center justify-end'>
+				<small className='text-gray-500'>{`${message.timestamp.toLocaleDateString()} ${message.timestamp.toLocaleTimeString()}`}</small>
+
 				<Button
 					variant='outlined'
-					color='warning'
-					onClick={(): void => handleMessageRegenerateClick()}
+					className='m-3'
+					onClick={(): void => handleMessageDeleteClick(message.id)}
 					disabled={isSubmitting}
 				>
-					Regenerate
+					Delete
 				</Button>
-			) : undefined}
+				{message.error ? (
+					<Button
+						variant='outlined'
+						color='warning'
+						onClick={(): void => handleMessageRegenerateClick()}
+						disabled={isSubmitting}
+					>
+						Regenerate
+					</Button>
+				) : undefined}
+			</div>
 		</div>
 	)
 }

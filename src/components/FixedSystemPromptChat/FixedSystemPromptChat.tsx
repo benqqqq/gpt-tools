@@ -12,8 +12,9 @@ import Message from './Message'
 import PromptChatBox from './PromptChatBox'
 import PromptSearchCombobox from './PromptSearchCombobox'
 import useKeyboardShortcutListener from './useKeyboardShortcutListener'
+import { Slider } from '@mui/material'
 
-const GPT_TEMPERATURE = 0.8
+const GPT_TEMPERATURE = 1
 
 const DEFAULT_COUNTER_STEP = 1
 const generateCounter = (
@@ -53,6 +54,7 @@ export default function FixedSystemPromptChat(): ReactElement {
 	>([])
 	const counter = useMemo(() => generateCounter(0), [])
 	const navigate = useNavigate()
+	const [gptTemperature, setGptTemperature] = useState(GPT_TEMPERATURE)
 
 	const submitMessages = useCallback(
 		async (chatCompletionMessages: IChatCompletionMessage[]) => {
@@ -83,7 +85,7 @@ export default function FixedSystemPromptChat(): ReactElement {
 						setIsSubmitting(false)
 						openSnackbar('Finish', 'success')
 					},
-					temperature: GPT_TEMPERATURE
+					temperature: gptTemperature
 				})
 			} catch (error) {
 				const errorMessage = (error as Error).message
@@ -103,7 +105,7 @@ export default function FixedSystemPromptChat(): ReactElement {
 				)
 			}
 		},
-		[closeSnackbar, isSubmitting, openSnackbar, openai]
+		[closeSnackbar, gptTemperature, isSubmitting, openSnackbar, openai]
 	)
 
 	const handleSubmitUserPrompt = useCallback(
@@ -202,6 +204,15 @@ export default function FixedSystemPromptChat(): ReactElement {
 		)
 	)
 
+	const handleGptTemperatureSlideChange = useCallback(
+		(event: Event, newValue: number[] | number) => {
+			if (typeof newValue === 'number') {
+				setGptTemperature(newValue)
+			}
+		},
+		[]
+	)
+
 	return (
 		<div className='flex w-full'>
 			<Head title={`${selectedPrompt.key} | Fixed System Prompt Chat`} />
@@ -212,6 +223,7 @@ export default function FixedSystemPromptChat(): ReactElement {
 					<h1 className='m-0 text-xl font-bold text-green-200'>
 						Role based Chat
 					</h1>
+					<strong className='text-amber-100 '>- {selectedPrompt.key}</strong>
 				</div>
 				<div className='my-5 rounded-lg bg-white p-1'>
 					<Setting />
@@ -222,7 +234,17 @@ export default function FixedSystemPromptChat(): ReactElement {
 						ref={promptSearchRef}
 					/>
 				</div>
-				<strong className='text-amber-100 '>- {selectedPrompt.key}</strong>
+				<div className='w-full px-5'>
+					<Slider
+						value={gptTemperature}
+						onChange={handleGptTemperatureSlideChange}
+						min={0}
+						max={2}
+						step={0.1}
+						marks
+						valueLabelDisplay='auto'
+					/>
+				</div>
 			</div>
 
 			{/* Content on Right */}
@@ -239,7 +261,7 @@ export default function FixedSystemPromptChat(): ReactElement {
 				</div>
 
 				{/* Messages grows from bottom to top */}
-				<div className='flex  flex-col-reverse overflow-y-auto bg-gray-100'>
+				<div className='flex max-w-[calc(100vw-250px)] flex-col-reverse overflow-y-auto bg-gray-100'>
 					{[...messages].reverse().map(message => (
 						<Message
 							key={message.id}

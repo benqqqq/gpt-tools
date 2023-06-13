@@ -1,10 +1,11 @@
 import type { ReactElement, Ref } from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import TextareaAutosize from '../common/TextareaAutosize'
 import { LoadingButton } from '@mui/lab'
 import { Button } from '@mui/material'
 import { generateUserPrompt, USER_PROMPT_SLOT } from './prompts'
 import type { IPrompt } from './types'
+import getLocalStorage from '../../storage/localStorage'
 
 interface IPromptChatBoxProperties {
 	onSubmit: (userPrompt: string, systemPrompt: string) => void
@@ -26,20 +27,34 @@ export default function PromptChatBox({
 	const [userPrompt, setUserPrompt] = useState('')
 	const [systemPrompt, setSystemPrompt] = useState('')
 
+	const userPromptLocalStorage = useMemo(
+		() => getLocalStorage(`PromptChatBox-${selectedPrompt.key}-UserPrompt`),
+		[selectedPrompt.key]
+	)
+
 	useEffect(() => {
 		setSystemPrompt(selectedPrompt.systemPrompt)
 	}, [selectedPrompt])
 
+	useEffect(() => {
+		const cacheUserPrompt = userPromptLocalStorage.get()
+		if (cacheUserPrompt) {
+			setUserPrompt(cacheUserPrompt)
+		}
+	}, [userPromptLocalStorage])
+
 	const submit = useCallback(() => {
 		setUserPrompt('')
+		userPromptLocalStorage.set('')
 		onSubmit(userPrompt, systemPrompt)
-	}, [onSubmit, systemPrompt, userPrompt])
+	}, [onSubmit, systemPrompt, userPrompt, userPromptLocalStorage])
 
 	const handleTextChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement>): void => {
 			setUserPrompt(event.target.value)
+			userPromptLocalStorage.set(event.target.value)
 		},
-		[]
+		[userPromptLocalStorage]
 	)
 	const handleKeyDown = useCallback(
 		(event: React.KeyboardEvent) => {

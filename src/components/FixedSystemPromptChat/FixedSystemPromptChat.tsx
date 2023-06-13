@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import Setting from '../common/Setting'
+import type { IChatCompletionMessage } from '../../services/OpenAiContext'
 import { useOpenAI } from '../../services/OpenAiContext'
 import { useSnackbar } from '../common/useSnackbar'
 import type { IMessage, IPrompt } from './types'
@@ -29,6 +30,14 @@ const generateCounter = (
 	}
 }
 
+function mapLatest<T>(items: T[], mapFunction: (item: T) => T): T[] {
+	const LATEST = -1
+	const latestItem = items.at(LATEST)
+	return latestItem === undefined
+		? items
+		: [...items.slice(0, LATEST), mapFunction(latestItem)]
+}
+
 export default function FixedSystemPromptChat(): ReactElement {
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const openai = useOpenAI()
@@ -39,21 +48,71 @@ export default function FixedSystemPromptChat(): ReactElement {
 		prompts[promptId]
 	)
 	const [messages, setMessages] = useState<IMessage[]>([])
+	const [submittedMessages, setSubmittedMessages] = useState<
+		IChatCompletionMessage[]
+	>([])
 	const counter = useMemo(() => generateCounter(0), [])
 	const navigate = useNavigate()
 
-	const handleSubmit = useCallback(
-		async (userPrompt: string, systemPrompt: string): Promise<void> => {
+	const submitMessages = useCallback(
+		async (chatCompletionMessages: IChatCompletionMessage[]) => {
 			if (isSubmitting) {
 				return
 			}
 			setIsSubmitting(true)
 			closeSnackbar()
+			setSubmittedMessages(chatCompletionMessages)
 
+			try {
+				await openai.chatCompletion({
+					messages: chatCompletionMessages,
+					onContent: (content: string): void => {
+						setMessages((previousMessages): IMessage[] =>
+							mapLatest<IMessage>(
+								previousMessages,
+								(message): IMessage => ({
+									id: message.id,
+									role: 'assistant',
+									content: message.content + content,
+									timestamp: new Date()
+								})
+							)
+						)
+					},
+					onFinish: (): void => {
+						setIsSubmitting(false)
+						openSnackbar('Finish', 'success')
+					},
+					temperature: GPT_TEMPERATURE
+				})
+			} catch (error) {
+				const errorMessage = (error as Error).message
+				openSnackbar(errorMessage, 'error')
+				setIsSubmitting(false)
+				setMessages((previousMessages): IMessage[] =>
+					mapLatest<IMessage>(
+						previousMessages,
+						(message): IMessage => ({
+							id: message.id,
+							role: 'assistant',
+							content: message.content,
+							timestamp: new Date(),
+							error: errorMessage
+						})
+					)
+				)
+			}
+		},
+		[closeSnackbar, isSubmitting, openSnackbar, openai]
+	)
+
+	const handleSubmitUserPrompt = useCallback(
+		async (userPrompt: string, systemPrompt: string): Promise<void> => {
 			const newUserPrompt = selectedPrompt.userPrompt
 				? generateUserPrompt(selectedPrompt.userPrompt, userPrompt)
 				: userPrompt
 
+			// add the next conversation
 			setMessages([
 				...messages,
 				{
@@ -70,54 +129,20 @@ export default function FixedSystemPromptChat(): ReactElement {
 				}
 			])
 
-			try {
-				await openai.chatCompletion({
-					messages: [
-						{
-							role: 'system',
-							content: systemPrompt
-						},
-						...messages.map(({ role, content }) => ({ role, content })),
-						{
-							role: 'user',
-							content: `${newUserPrompt}\n\n${assistantOutputHint}`
-						}
-					],
-					onContent: (content: string): void => {
-						const LATEST = -1
-						setMessages((previousMessages): IMessage[] => {
-							const latestMessage = previousMessages.at(LATEST) as IMessage
-							return [
-								...previousMessages.slice(0, LATEST),
-								{
-									id: latestMessage.id,
-									role: 'assistant',
-									content: latestMessage.content + content,
-									timestamp: new Date()
-								}
-							]
-						})
-					},
-					onFinish: (): void => {
-						setIsSubmitting(false)
-						openSnackbar('Finish', 'success')
-					},
-					temperature: GPT_TEMPERATURE
-				})
-			} catch (error) {
-				openSnackbar((error as Error).message, 'error')
-				setIsSubmitting(false)
-			}
+			// add system prompt and user prompt
+			await submitMessages([
+				{
+					role: 'system',
+					content: systemPrompt
+				},
+				...messages.map(({ role, content }) => ({ role, content })),
+				{
+					role: 'user',
+					content: `${newUserPrompt}\n\n${assistantOutputHint}`
+				}
+			])
 		},
-		[
-			closeSnackbar,
-			counter,
-			isSubmitting,
-			messages,
-			openSnackbar,
-			openai,
-			selectedPrompt.userPrompt
-		]
+		[counter, messages, selectedPrompt.userPrompt, submitMessages]
 	)
 
 	const selectPrompt = useCallback(
@@ -133,6 +158,10 @@ export default function FixedSystemPromptChat(): ReactElement {
 			previousMessage.filter(message => message.id !== messageId)
 		)
 	}, [])
+
+	const handleMessageRegenerateClick = useCallback(() => {
+		void submitMessages(submittedMessages)
+	}, [submitMessages, submittedMessages])
 
 	const clearMessages = useCallback(() => {
 		setMessages([])
@@ -177,13 +206,12 @@ export default function FixedSystemPromptChat(): ReactElement {
 		<div className='flex w-full'>
 			<Head title={`${selectedPrompt.key} | Fixed System Prompt Chat`} />
 
-			{/* Header */}
+			{/* Sidebar on Left */}
 			<div className='flex h-screen w-[250px] flex-col items-start bg-gray-800 p-3'>
 				<div className='my-5'>
 					<h1 className='m-0 text-xl font-bold text-green-200'>
 						Role based Chat
 					</h1>
-					<strong className='text-amber-100'>- {selectedPrompt.key}</strong>
 				</div>
 				<div className='my-5 rounded-lg bg-white p-1'>
 					<Setting />
@@ -194,30 +222,33 @@ export default function FixedSystemPromptChat(): ReactElement {
 						ref={promptSearchRef}
 					/>
 				</div>
+				<strong className='text-amber-100 '>- {selectedPrompt.key}</strong>
 			</div>
 
-			{/* Messages */}
-			<div className='flex h-screen flex-grow flex-col-reverse overflow-y-auto bg-gray-100 pb-[125px]'>
-				<div>
+			{/* Content on Right */}
+			<div className='flex h-screen w-full flex-col-reverse'>
+				{/* Prompt at Bottom */}
+				<div className='w-full bg-white p-3'>
+					<PromptChatBox
+						selectedPrompt={selectedPrompt}
+						isSubmitting={isSubmitting}
+						onClear={handleClearClick}
+						onSubmit={handleSubmitUserPrompt}
+						userPromptInputRef={userPromptRef}
+					/>
+				</div>
+
+				{/* Messages grows from bottom to top */}
+				<div className='flex w-full flex-col overflow-y-auto bg-gray-100'>
 					{messages.map(message => (
 						<Message
 							key={message.id}
 							message={message}
 							onDeleteMessage={handleMessageDeleteClick}
+							onRegenerateMessage={handleMessageRegenerateClick}
 						/>
 					))}
 				</div>
-			</div>
-
-			{/* Prompt */}
-			<div className='fixed bottom-0 w-full bg-white p-3'>
-				<PromptChatBox
-					selectedPrompt={selectedPrompt}
-					isSubmitting={isSubmitting}
-					onClear={handleClearClick}
-					onSubmit={handleSubmit}
-					userPromptInputRef={userPromptRef}
-				/>
 			</div>
 			{snackbarComponent}
 		</div>

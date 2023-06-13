@@ -9,4 +9,5 @@ export interface IPrompt {
 export interface IMessage extends IChatCompletionMessage {
 	timestamp: Date
 	id: number
+	error?: string
 }

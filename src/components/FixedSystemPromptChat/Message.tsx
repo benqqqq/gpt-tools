@@ -6,10 +6,14 @@ import type { IMessage } from './types'
 
 function Message({
 	message,
-	onDeleteMessage
+	onDeleteMessage,
+	onRegenerateMessage,
+	isSubmitting
 }: {
 	message: IMessage
 	onDeleteMessage: (id: number) => void
+	onRegenerateMessage: () => void
+	isSubmitting: boolean
 }): ReactElement {
 	const handleMessageDeleteClick = useCallback(
 		(id: number): void => {
@@ -17,6 +21,9 @@ function Message({
 		},
 		[onDeleteMessage]
 	)
+	const handleMessageRegenerateClick = useCallback((): void => {
+		onRegenerateMessage()
+	}, [onRegenerateMessage])
 	return (
 		<div
 			key={message.id}
@@ -35,9 +42,20 @@ function Message({
 				variant='outlined'
 				className='m-3'
 				onClick={(): void => handleMessageDeleteClick(message.id)}
+				disabled={isSubmitting}
 			>
 				Delete
 			</Button>
+			{message.error ? (
+				<Button
+					variant='outlined'
+					color='warning'
+					onClick={(): void => handleMessageRegenerateClick()}
+					disabled={isSubmitting}
+				>
+					Regenerate
+				</Button>
+			) : undefined}
 		</div>
 	)
 }

@@ -69,6 +69,7 @@ export default function PromptChatBox({
 		<div className='flex'>
 			<div className='flex items-center'>
 				<TextareaAutosize
+					placeholder='user prompt'
 					value={userPrompt}
 					onChange={handleTextChange}
 					onKeyDown={handleKeyDown}
@@ -77,7 +78,7 @@ export default function PromptChatBox({
 					maxRowsWhenNotActive={MAX_ROWS_WHEN_NOT_ACTIVE}
 					ref={userPromptInputRef}
 				/>
-				<div className='m-2 flex h-[100px] w-[100px] flex-col justify-around'>
+				<div className='m-2 flex space-x-1'>
 					<LoadingButton
 						variant='contained'
 						type='submit'
@@ -92,26 +93,24 @@ export default function PromptChatBox({
 				</div>
 			</div>
 			<div className='p-3'>
-				<small>System Prompt</small>
 				<TextareaAutosize
+					placeholder='system prompt'
 					value={systemPrompt}
 					onChange={handleSystemPromptChange}
 					className='w-[500px] rounded-xl border-gray-300'
 					maxRowsWhenNotActive={MAX_ROWS_WHEN_NOT_ACTIVE}
 				/>
 				{selectedPrompt.userPrompt ? (
-					<>
-						<small>User Prompt</small>
-						<TextareaAutosize
-							value={generateUserPrompt(
-								selectedPrompt.userPrompt,
-								userPrompt || USER_PROMPT_SLOT
-							)}
-							readOnly
-							className='w-[500px] rounded-xl border-gray-300'
-							maxRowsWhenNotActive={MAX_ROWS_WHEN_NOT_ACTIVE}
-						/>
-					</>
+					<TextareaAutosize
+						placeholder='user prompt'
+						value={generateUserPrompt(
+							selectedPrompt.userPrompt,
+							userPrompt || USER_PROMPT_SLOT
+						)}
+						readOnly
+						className='w-[500px] rounded-xl border-gray-300'
+						maxRowsWhenNotActive={MAX_ROWS_WHEN_NOT_ACTIVE}
+					/>
 				) : undefined}
 			</div>
 		</div>

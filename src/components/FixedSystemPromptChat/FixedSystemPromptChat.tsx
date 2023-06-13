@@ -226,9 +226,9 @@ export default function FixedSystemPromptChat(): ReactElement {
 			</div>
 
 			{/* Content on Right */}
-			<div className='flex h-screen w-full flex-col-reverse'>
+			<div className='flex h-screen flex-grow flex-col-reverse'>
 				{/* Prompt at Bottom */}
-				<div className='w-full bg-white p-3'>
+				<div className=' bg-white p-3'>
 					<PromptChatBox
 						selectedPrompt={selectedPrompt}
 						isSubmitting={isSubmitting}
@@ -239,7 +239,7 @@ export default function FixedSystemPromptChat(): ReactElement {
 				</div>
 
 				{/* Messages grows from bottom to top */}
-				<div className='flex w-full flex-col-reverse overflow-y-auto bg-gray-100'>
+				<div className='flex  flex-col-reverse overflow-y-auto bg-gray-100'>
 					{[...messages].reverse().map(message => (
 						<Message
 							key={message.id}

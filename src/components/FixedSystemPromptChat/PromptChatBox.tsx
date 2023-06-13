@@ -82,13 +82,13 @@ export default function PromptChatBox({
 
 	return (
 		<div className='flex'>
-			<div className='flex items-center'>
+			<div className='flex flex-grow items-center'>
 				<TextareaAutosize
 					placeholder='user prompt'
 					value={userPrompt}
 					onChange={handleTextChange}
 					onKeyDown={handleKeyDown}
-					className='w-[500px] rounded-xl border-gray-300'
+					className='flex-grow rounded-xl border-gray-300'
 					autoFocus
 					maxRowsWhenNotActive={MAX_ROWS_WHEN_NOT_ACTIVE}
 					ref={userPromptInputRef}
@@ -107,12 +107,12 @@ export default function PromptChatBox({
 					</Button>
 				</div>
 			</div>
-			<div className='p-3'>
+			<div className='flex flex-grow flex-col space-y-1 p-3'>
 				<TextareaAutosize
 					placeholder='system prompt'
 					value={systemPrompt}
 					onChange={handleSystemPromptChange}
-					className='w-[500px] rounded-xl border-gray-300'
+					className='flex-grow rounded-xl border-gray-300'
 					maxRowsWhenNotActive={MAX_ROWS_WHEN_NOT_ACTIVE}
 				/>
 				{selectedPrompt.userPrompt ? (
@@ -123,7 +123,7 @@ export default function PromptChatBox({
 							userPrompt || USER_PROMPT_SLOT
 						)}
 						readOnly
-						className='w-[500px] rounded-xl border-gray-300'
+						className='flex-grow rounded-xl border-gray-300'
 						maxRowsWhenNotActive={MAX_ROWS_WHEN_NOT_ACTIVE}
 					/>
 				) : undefined}

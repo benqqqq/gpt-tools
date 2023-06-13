@@ -239,13 +239,14 @@ export default function FixedSystemPromptChat(): ReactElement {
 				</div>
 
 				{/* Messages grows from bottom to top */}
-				<div className='flex w-full flex-col overflow-y-auto bg-gray-100'>
-					{messages.map(message => (
+				<div className='flex w-full flex-col-reverse overflow-y-auto bg-gray-100'>
+					{[...messages].reverse().map(message => (
 						<Message
 							key={message.id}
 							message={message}
 							onDeleteMessage={handleMessageDeleteClick}
 							onRegenerateMessage={handleMessageRegenerateClick}
+							isSubmitting={isSubmitting}
 						/>
 					))}
 				</div>

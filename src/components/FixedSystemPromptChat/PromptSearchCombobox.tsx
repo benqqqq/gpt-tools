@@ -33,7 +33,6 @@ const PromptSearchCombobox = forwardRef(
 				value=''
 				options={promptOptions}
 				filterOptions={filterOptions}
-				className='w-[200px]'
 				autoHighlight
 				openOnFocus
 				selectOnFocus

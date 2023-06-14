@@ -56,6 +56,7 @@ export default function EnglishCorrectnessChecker(): ReactElement {
 						content: generateUserPrompt(englishTeacherUserPrompt, text)
 					}
 				],
+				model: 'gpt-3.5-turbo-0613',
 				onContent: (content: string): void => {
 					setAnswer(ans => ans + content)
 				},

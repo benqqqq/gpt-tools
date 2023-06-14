@@ -1,8 +1,11 @@
-import type { ReactElement } from 'react'
+import type { ReactElement, SyntheticEvent } from 'react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import Setting from '../common/Setting'
-import type { IChatCompletionMessage } from '../../services/OpenAiContext'
-import { useOpenAI } from '../../services/OpenAiContext'
+import type {
+	IChatCompletionMessage,
+	IChatCompletionOptions
+} from '../../services/OpenAiContext'
+import { GPT_MODELS, useOpenAI } from '../../services/OpenAiContext'
 import { useSnackbar } from '../common/useSnackbar'
 import type { IMessage, IPrompt } from './types'
 import { assistantOutputHint, generateUserPrompt, prompts } from './prompts'
@@ -12,7 +15,7 @@ import Message from './Message'
 import PromptChatBox from './PromptChatBox'
 import PromptSearchCombobox from './PromptSearchCombobox'
 import useKeyboardShortcutListener from './useKeyboardShortcutListener'
-import { Slider } from '@mui/material'
+import { Autocomplete, Slider, TextField } from '@mui/material'
 
 const GPT_TEMPERATURE = 1
 
@@ -55,6 +58,8 @@ export default function FixedSystemPromptChat(): ReactElement {
 	const counter = useMemo(() => generateCounter(0), [])
 	const navigate = useNavigate()
 	const [gptTemperature, setGptTemperature] = useState(GPT_TEMPERATURE)
+	const [gptModel, setGptModel] =
+		useState<IChatCompletionOptions['model']>('gpt-3.5-turbo-0613')
 
 	const submitMessages = useCallback(
 		async (chatCompletionMessages: IChatCompletionMessage[]) => {
@@ -68,6 +73,7 @@ export default function FixedSystemPromptChat(): ReactElement {
 			try {
 				await openai.chatCompletion({
 					messages: chatCompletionMessages,
+					model: gptModel,
 					onContent: (content: string): void => {
 						setMessages((previousMessages): IMessage[] =>
 							mapLatest<IMessage>(
@@ -105,7 +111,14 @@ export default function FixedSystemPromptChat(): ReactElement {
 				)
 			}
 		},
-		[closeSnackbar, gptTemperature, isSubmitting, openSnackbar, openai]
+		[
+			closeSnackbar,
+			gptModel,
+			gptTemperature,
+			isSubmitting,
+			openSnackbar,
+			openai
+		]
 	)
 
 	const handleSubmitUserPrompt = useCallback(
@@ -213,6 +226,13 @@ export default function FixedSystemPromptChat(): ReactElement {
 		[]
 	)
 
+	const handleGptModelChange = useCallback(
+		(event: SyntheticEvent, value: string | null) => {
+			setGptModel(value as IChatCompletionOptions['model'])
+		},
+		[]
+	)
+
 	return (
 		<div className='flex w-full'>
 			<Head title={`${selectedPrompt.key} | Fixed System Prompt Chat`} />
@@ -221,20 +241,21 @@ export default function FixedSystemPromptChat(): ReactElement {
 			<div className='flex h-screen w-[250px] flex-col items-start bg-gray-800 p-3'>
 				<div className='my-5'>
 					<h1 className='m-0 text-xl font-bold text-green-200'>
-						Role based Chat
+						GPT Playground
 					</h1>
 					<strong className='text-amber-100 '>- {selectedPrompt.key}</strong>
 				</div>
 				<div className='my-5 rounded-lg bg-white p-1'>
 					<Setting />
 				</div>
-				<div className='my-5 rounded-lg bg-white'>
+				<div className='my-5 w-full rounded-lg bg-white'>
 					<PromptSearchCombobox
 						onSelect={handlePromptSearchSelect}
 						ref={promptSearchRef}
 					/>
 				</div>
-				<div className='w-full px-5'>
+				<div className='w-full px-1 text-white'>
+					Temperature
 					<Slider
 						value={gptTemperature}
 						onChange={handleGptTemperatureSlideChange}
@@ -243,6 +264,20 @@ export default function FixedSystemPromptChat(): ReactElement {
 						step={0.1}
 						marks
 						valueLabelDisplay='auto'
+					/>
+				</div>
+				<div className='my-5 w-full rounded-lg bg-white'>
+					<Autocomplete
+						options={GPT_MODELS}
+						autoHighlight
+						openOnFocus
+						selectOnFocus
+						disableClearable
+						value={gptModel}
+						onChange={handleGptModelChange}
+						renderInput={(params): ReactElement => (
+							<TextField {...params} label='Model' type='text' />
+						)}
 					/>
 				</div>
 			</div>

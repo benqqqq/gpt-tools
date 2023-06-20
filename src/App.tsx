@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
 import { CssBaseline } from '@mui/material'
 
 const GptPlaygroundPage = lazy(async () => import('pages/GptPlayground'))
+const PromptListPage = lazy(async () => import('pages/PromptList'))
 
 export default function App(): ReactElement {
 	return (
@@ -17,6 +18,7 @@ export default function App(): ReactElement {
 						element={<Navigate to='/gpt-playground/' replace />}
 					/>
 					<Route path='/gpt-playground/:id?/' element={<GptPlaygroundPage />} />
+					<Route path='/prompt-list' element={<PromptListPage />} />
 				</Routes>
 			</Suspense>
 		</BrowserRouter>

@@ -9,7 +9,7 @@ import { GPT_MODELS, useOpenAI } from '../../services/OpenAiContext'
 import { useSnackbar } from '../common/useSnackbar'
 import type { IMessage, IPrompt } from './types'
 import { assistantOutputHint, generateUserPrompt, prompts } from './prompts'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import Head from '../common/Head'
 import Message from './Message'
 import PromptChatBox from './PromptChatBox'
@@ -290,6 +290,11 @@ export default function GptPlayground(): ReactElement {
 							<TextField {...params} label='Model' type='text' />
 						)}
 					/>
+				</div>
+				<div className='my-5'>
+					<Link to='/prompt-list' className='italic text-white no-underline'>
+						📍Prompt list
+					</Link>
 				</div>
 			</div>
 

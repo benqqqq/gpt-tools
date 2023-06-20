@@ -1,16 +1,10 @@
 import LoadingOrError from 'components/common/LoadingOrError'
 import type { ReactElement } from 'react'
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
 import { CssBaseline } from '@mui/material'
 
-const HomePage = lazy(async () => import('pages/HomePage'))
-const EnglishCorrectnessCheckerPage = lazy(
-	async () => import('pages/EnglishCorrectnessCheckerPage')
-)
-const FixedSystemPromptChatPage = lazy(
-	async () => import('pages/FixedSystemPromptChatPage')
-)
+const GptPlaygroundPage = lazy(async () => import('pages/GptPlayground'))
 
 export default function App(): ReactElement {
 	return (
@@ -18,15 +12,11 @@ export default function App(): ReactElement {
 			<CssBaseline />
 			<Suspense fallback={<LoadingOrError />}>
 				<Routes>
-					<Route path='/' element={<HomePage />} />
 					<Route
-						path='/english-correctness-checker-page'
-						element={<EnglishCorrectnessCheckerPage />}
+						path='/'
+						element={<Navigate to='/gpt-playground/' replace />}
 					/>
-					<Route
-						path='/fixed-system-prompt-chat/:id?/'
-						element={<FixedSystemPromptChatPage />}
-					/>
+					<Route path='/gpt-playground/:id?/' element={<GptPlaygroundPage />} />
 				</Routes>
 			</Suspense>
 		</BrowserRouter>

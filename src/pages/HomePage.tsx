@@ -3,6 +3,12 @@ import type { ReactElement } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@mui/material'
 
+/**
+ * @deprecated use it when there are multiple pages
+ *
+ *
+ * @constructor
+ */
 export default function HomePage(): ReactElement {
 	return (
 		<>
@@ -19,7 +25,7 @@ export default function HomePage(): ReactElement {
 					</Link>
 					<Link to='/fixed-system-prompt-chat'>
 						<Button variant='contained' size='large'>
-							Fixed System Prompt Chat
+							GPT Playground
 						</Button>
 					</Link>
 				</div>

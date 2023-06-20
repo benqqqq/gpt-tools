@@ -42,7 +42,7 @@ function mapLatest<T>(items: T[], mapFunction: (item: T) => T): T[] {
 		: [...items.slice(0, LATEST), mapFunction(latestItem)]
 }
 
-export default function FixedSystemPromptChat(): ReactElement {
+export default function GptPlayground(): ReactElement {
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const openai = useOpenAI()
 	const [openSnackbar, closeSnackbar, snackbarComponent] = useSnackbar()
@@ -164,7 +164,7 @@ export default function FixedSystemPromptChat(): ReactElement {
 	const selectPrompt = useCallback(
 		(prompt: IPrompt): void => {
 			setSelectedPrompt(prompt)
-			navigate(`/fixed-system-prompt-chat/${prompts.indexOf(prompt)}/`)
+			navigate(`/gpt-playground/${prompts.indexOf(prompt)}/`)
 		},
 		[navigate]
 	)

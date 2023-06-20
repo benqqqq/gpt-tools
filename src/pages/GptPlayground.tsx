@@ -1,13 +1,13 @@
 import type { ReactElement } from 'react'
 import { OpenAIProvider } from '../services/OpenAiContext'
 import { SettingProvider } from '../services/SettingContext'
-import FixedSystemPromptChat from '../components/FixedSystemPromptChat/FixedSystemPromptChat'
+import GptPlayground from '../components/GptPlayground/GptPlayground'
 
-export default function FixedSystemPromptChatPage(): ReactElement {
+export default function GptPlaygroundPage(): ReactElement {
 	return (
 		<SettingProvider>
 			<OpenAIProvider>
-				<FixedSystemPromptChat />
+				<GptPlayground />
 			</OpenAIProvider>
 		</SettingProvider>
 	)

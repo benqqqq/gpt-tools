@@ -1,15 +1,16 @@
 import LoadingOrError from 'components/common/LoadingOrError'
 import type { ReactElement } from 'react'
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { CssBaseline } from '@mui/material'
+import { getConfig } from './config'
 
 const GptPlaygroundPage = lazy(async () => import('pages/GptPlayground'))
 const PromptListPage = lazy(async () => import('pages/PromptList'))
 
 export default function App(): ReactElement {
 	return (
-		<BrowserRouter>
+		<BrowserRouter basename={getConfig().basename}>
 			<CssBaseline />
 			<Suspense fallback={<LoadingOrError />}>
 				<Routes>

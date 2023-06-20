@@ -60,6 +60,7 @@ export default function FixedSystemPromptChat(): ReactElement {
 	const [gptTemperature, setGptTemperature] = useState(GPT_TEMPERATURE)
 	const [gptModel, setGptModel] =
 		useState<IChatCompletionOptions['model']>('gpt-3.5-turbo-0613')
+	const messageRef = useRef<HTMLDivElement>(null)
 
 	const submitMessages = useCallback(
 		async (chatCompletionMessages: IChatCompletionMessage[]) => {
@@ -203,6 +204,7 @@ export default function FixedSystemPromptChat(): ReactElement {
 
 	const promptSearchRef = useRef<HTMLInputElement>(null)
 
+	const SCROLL_STEP = 100
 	useKeyboardShortcutListener(
 		useMemo(
 			() => ({
@@ -211,6 +213,15 @@ export default function FixedSystemPromptChat(): ReactElement {
 				},
 				onCmdJ: (): void => {
 					clearMessages()
+				},
+				onCmdArrowUp: (): void => {
+					messageRef.current?.scrollBy({
+						top: -SCROLL_STEP,
+						behavior: 'smooth'
+					})
+				},
+				onCmdArrowDown: (): void => {
+					messageRef.current?.scrollBy({ top: SCROLL_STEP, behavior: 'smooth' })
 				}
 			}),
 			[clearMessages]
@@ -296,7 +307,10 @@ export default function FixedSystemPromptChat(): ReactElement {
 				</div>
 
 				{/* Messages grows from bottom to top */}
-				<div className='flex max-w-[calc(100vw-250px)] flex-col-reverse overflow-y-auto bg-gray-100'>
+				<div
+					className='flex max-w-[calc(100vw-250px)] flex-col-reverse overflow-y-auto bg-gray-100'
+					ref={messageRef}
+				>
 					{[...messages].reverse().map(message => (
 						<Message
 							key={message.id}

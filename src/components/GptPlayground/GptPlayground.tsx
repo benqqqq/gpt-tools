@@ -214,6 +214,9 @@ export default function GptPlayground(): ReactElement {
 				onCmdJ: (): void => {
 					clearMessages()
 				},
+				onCmdU: (): void => {
+					userPromptRef.current?.focus()
+				},
 				onCmdArrowUp: (): void => {
 					messageRef.current?.scrollBy({
 						top: -SCROLL_STEP,
@@ -222,6 +225,9 @@ export default function GptPlayground(): ReactElement {
 				},
 				onCmdArrowDown: (): void => {
 					messageRef.current?.scrollBy({ top: SCROLL_STEP, behavior: 'smooth' })
+				},
+				onEsc: (): void => {
+					messageRef.current?.focus()
 				}
 			}),
 			[clearMessages]
@@ -314,6 +320,7 @@ export default function GptPlayground(): ReactElement {
 				{/* Messages grows from bottom to top */}
 				<div
 					className='flex max-w-[calc(100vw-250px)] flex-col-reverse overflow-y-auto bg-gray-100'
+					tabIndex={-1} // to make it focusable
 					ref={messageRef}
 				>
 					{[...messages].reverse().map(message => (

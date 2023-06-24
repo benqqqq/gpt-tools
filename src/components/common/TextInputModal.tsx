@@ -4,18 +4,17 @@ import { Box, Button, Modal, TextareaAutosize } from '@mui/material'
 
 interface ITextInputModal {
 	children: ({ openModal }: { openModal: () => void }) => ReactElement
-	onCloseModal: (text: string) => void
+	onOk: (text: string) => void
 }
 export default function TextInputModal({
 	children,
-	onCloseModal
+	onOk
 }: ITextInputModal): ReactElement {
 	const [isOpen, setIsOpen] = useState(false)
 	const [text, setText] = useState('')
 	const handleClose = useCallback(() => {
 		setIsOpen(false)
-		onCloseModal(text)
-	}, [onCloseModal, text])
+	}, [])
 
 	const openModal = useCallback(() => {
 		setIsOpen(true)
@@ -30,8 +29,8 @@ export default function TextInputModal({
 
 	const handleOkClick = useCallback(() => {
 		setIsOpen(false)
-		onCloseModal(text)
-	}, [onCloseModal, text])
+		onOk(text)
+	}, [onOk, text])
 
 	return (
 		<>

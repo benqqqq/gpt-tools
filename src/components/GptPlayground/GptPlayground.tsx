@@ -367,7 +367,7 @@ export default function GptPlayground(): ReactElement {
 				<div className='my-5 space-x-2'>
 					<Tooltip title='Import context'>
 						<Box className='inline-block'>
-							<TextInputModal onCloseModal={handleImportTextModalClose}>
+							<TextInputModal onOk={handleImportTextModalClose}>
 								{({ openModal }): ReactElement => (
 									<Button
 										variant='contained'

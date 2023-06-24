@@ -1,7 +1,7 @@
 import type { ReactElement, Ref } from 'react'
 import { forwardRef, useCallback } from 'react'
 import { Autocomplete, TextField } from '@mui/material'
-import { prompts } from './prompts'
+import { prompts } from './prompts/prompts'
 import { matchSorter } from 'match-sorter'
 
 const promptOptions = [...prompts.map(prompt => prompt.key), '']

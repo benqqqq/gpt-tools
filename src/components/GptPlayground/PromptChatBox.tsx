@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import TextareaAutosize from '../common/TextareaAutosize'
 import { LoadingButton } from '@mui/lab'
 import { Button } from '@mui/material'
-import { generateUserPrompt, USER_PROMPT_SLOT } from './prompts'
+import { generateUserPrompt, USER_PROMPT_SLOT } from './prompts/prompts'
 import type { IPrompt } from './types'
 import getLocalStorage from '../../storage/localStorage'
 

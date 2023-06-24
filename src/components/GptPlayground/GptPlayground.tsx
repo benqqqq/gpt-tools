@@ -8,7 +8,11 @@ import type {
 import { GPT_MODELS, useOpenAI } from '../../services/OpenAiContext'
 import { useSnackbar } from '../common/useSnackbar'
 import type { IMessage, IPrompt } from './types'
-import { assistantOutputHint, generateUserPrompt, prompts } from './prompts'
+import {
+	assistantOutputHint,
+	generateUserPrompt,
+	prompts
+} from './prompts/prompts'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import Head from '../common/Head'
 import Message from './Message'

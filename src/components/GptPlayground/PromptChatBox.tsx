@@ -3,15 +3,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import TextareaAutosize from '../common/TextareaAutosize'
 import { LoadingButton } from '@mui/lab'
 import { Button } from '@mui/material'
-import { generateUserPrompt, USER_PROMPT_SLOT } from './prompts/prompts'
-import type { IPrompt } from './types'
+import { generateUserPrompt, USER_PROMPT_SLOT } from './prompts/promptTemplates'
+import type { IPromptTemplate } from './types'
 import getLocalStorage from '../../storage/localStorage'
 
 interface IPromptChatBoxProperties {
 	onSubmit: (userPrompt: string, systemPrompt: string) => void
 	onClear: () => void
 	isSubmitting: boolean
-	selectedPrompt: IPrompt
+	selectedPrompt: IPromptTemplate
 	userPromptInputRef?: Ref<HTMLTextAreaElement>
 }
 

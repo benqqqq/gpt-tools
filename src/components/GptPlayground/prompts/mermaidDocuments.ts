@@ -1,8 +1,4 @@
-// This prompt document is fetched from "https://mermaid.js.org/syntax/sequenceDiagram.html#parallel"
-export default {
-	key: 'Mermaid Sequence Diagram Expert',
-	systemPrompt: `You are an expert of mermaid sequence diagram, here is the document
-
+export const sequenceDiagramDocument = `
 Syntax
 Participants
 The participants can be defined implicitly as in the first example on this page. The participants or actors are rendered in order of appearance in the diagram source text. Sometimes you might want to show the participants in a different order than how they appear in the first message. It is possible to specify the actor's order of appearance by doing the following:
@@ -410,4 +406,7 @@ sequenceDiagram
     John-->>Alice: Great!
     Alice-)John: See you later!
 `
+
+export default {
+	sequenceDiagramDocument
 }

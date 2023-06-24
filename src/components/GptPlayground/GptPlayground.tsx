@@ -7,19 +7,34 @@ import type {
 } from '../../services/OpenAiContext'
 import { GPT_MODELS, useOpenAI } from '../../services/OpenAiContext'
 import { useSnackbar } from '../common/useSnackbar'
-import type { IMessage, IPrompt } from './types'
+import type { IMessage, IPromptTemplate } from './types'
 import {
 	assistantOutputHint,
 	generateUserPrompt,
-	prompts
-} from './prompts/prompts'
+	promptTemplates
+} from './prompts/promptTemplates'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import Head from '../common/Head'
 import Message from './Message'
 import PromptChatBox from './PromptChatBox'
 import PromptSearchCombobox from './PromptSearchCombobox'
 import useKeyboardShortcutListener from './useKeyboardShortcutListener'
-import { Autocomplete, Slider, TextField } from '@mui/material'
+import {
+	Autocomplete,
+	Box,
+	Button,
+	Slider,
+	TextField,
+	Tooltip
+} from '@mui/material'
+import {
+	promptGenerateMermaidSequenceDiagram,
+	promptImportContext
+} from './prompts/usefulPrompts'
+import CopyToClipboardIcon from '../ui/CopyToClipboardIcon'
+import GenerateSequenceDiagramIcon from '../ui/GenerateSequenceDiagramIcon'
+import ImportIcon from '../ui/ImportIcon'
+import TextInputModal from '../common/TextInputModal'
 
 const GPT_TEMPERATURE = 1
 
@@ -52,8 +67,8 @@ export default function GptPlayground(): ReactElement {
 	const [openSnackbar, closeSnackbar, snackbarComponent] = useSnackbar()
 	const { id } = useParams()
 	const promptId = Number.parseInt(id ?? '0', 10) || 0
-	const [selectedPrompt, setSelectedPrompt] = useState<IPrompt>(
-		prompts[promptId]
+	const [selectedPrompt, setSelectedPrompt] = useState<IPromptTemplate>(
+		promptTemplates[promptId]
 	)
 	const [messages, setMessages] = useState<IMessage[]>([])
 	const [submittedMessages, setSubmittedMessages] = useState<
@@ -126,19 +141,14 @@ export default function GptPlayground(): ReactElement {
 		]
 	)
 
-	const handleSubmitUserPrompt = useCallback(
+	const submitPrompt = useCallback(
 		async (userPrompt: string, systemPrompt: string): Promise<void> => {
-			const newUserPrompt = selectedPrompt.userPrompt
-				? generateUserPrompt(selectedPrompt.userPrompt, userPrompt)
-				: userPrompt
-
-			// add the next conversation
 			setMessages([
 				...messages,
 				{
 					id: counter.assign(),
 					role: 'user',
-					content: newUserPrompt,
+					content: userPrompt,
 					timestamp: new Date()
 				},
 				{
@@ -150,6 +160,13 @@ export default function GptPlayground(): ReactElement {
 			])
 
 			// add system prompt and user prompt
+			const submitUserPrompt = selectedPrompt.userPrompt
+				? generateUserPrompt(selectedPrompt.userPrompt, userPrompt)
+				: userPrompt
+			const submitUserPromptHint = selectedPrompt.disableMarkdownUserPromptHint
+				? ''
+				: `\n\n${assistantOutputHint}`
+
 			await submitMessages([
 				{
 					role: 'system',
@@ -158,17 +175,29 @@ export default function GptPlayground(): ReactElement {
 				...messages.map(({ role, content }) => ({ role, content })),
 				{
 					role: 'user',
-					content: `${newUserPrompt}\n\n${assistantOutputHint}`
+					content: `${submitUserPrompt}${submitUserPromptHint}`
 				}
 			])
 		},
-		[counter, messages, selectedPrompt.userPrompt, submitMessages]
+		[
+			counter,
+			messages,
+			selectedPrompt.disableMarkdownUserPromptHint,
+			selectedPrompt.userPrompt,
+			submitMessages
+		]
+	)
+
+	const handleSubmitUserPrompt = useCallback(
+		async (userPrompt: string, systemPrompt: string) =>
+			submitPrompt(userPrompt, systemPrompt),
+		[submitPrompt]
 	)
 
 	const selectPrompt = useCallback(
-		(prompt: IPrompt): void => {
+		(prompt: IPromptTemplate): void => {
 			setSelectedPrompt(prompt)
-			navigate(`/gpt-playground/${prompts.indexOf(prompt)}/`)
+			navigate(`/gpt-playground/${promptTemplates.indexOf(prompt)}/`)
 		},
 		[navigate]
 	)
@@ -195,7 +224,7 @@ export default function GptPlayground(): ReactElement {
 
 	const handlePromptSearchSelect = useCallback(
 		(promptKey: string) => {
-			const prompt = prompts.find(p => p.key === promptKey)
+			const prompt = promptTemplates.find(p => p.key === promptKey)
 			if (prompt) {
 				selectPrompt(prompt)
 				userPromptRef.current?.focus()
@@ -254,12 +283,41 @@ export default function GptPlayground(): ReactElement {
 		[]
 	)
 
+	const handleCopyConversationsClick = useCallback(() => {
+		const text = messages
+			.map(({ role, content }) => `${role}: ${content}`)
+			.join('\n')
+		void navigator.clipboard.writeText(text)
+	}, [messages])
+
+	const handleGenerateSequenceDiagramClick = useCallback(() => {
+		void submitPrompt(
+			promptGenerateMermaidSequenceDiagram,
+			selectedPrompt.systemPrompt
+		)
+	}, [selectedPrompt.systemPrompt, submitPrompt])
+
+	const handleImportContextClick = useCallback(
+		(openModal: () => void) => () => openModal(),
+		[]
+	)
+
+	const handleImportTextModalClose = useCallback(
+		(text: string) => {
+			void submitPrompt(
+				`${text}\n\n${promptImportContext}`,
+				selectedPrompt.systemPrompt
+			)
+		},
+		[selectedPrompt.systemPrompt, submitPrompt]
+	)
+
 	return (
 		<div className='flex w-full'>
 			<Head title={`${selectedPrompt.key} | Fixed System Prompt Chat`} />
 
 			{/* Sidebar on Left */}
-			<div className='flex h-screen w-[250px] flex-col items-start bg-gray-800 p-3'>
+			<div className='flex min-h-screen w-[250px] flex-col items-start bg-gray-800 p-3'>
 				<div className='my-5'>
 					<h1 className='m-0 text-xl font-bold text-green-200'>
 						GPT Playground
@@ -305,6 +363,37 @@ export default function GptPlayground(): ReactElement {
 					<Link to='/prompt-list' className='italic text-white no-underline'>
 						📍Prompt list
 					</Link>
+				</div>
+				<div className='my-5 space-x-2'>
+					<Tooltip title='Import context'>
+						<Box className='inline-block'>
+							<TextInputModal onCloseModal={handleImportTextModalClose}>
+								{({ openModal }): ReactElement => (
+									<Button
+										variant='contained'
+										onClick={handleImportContextClick(openModal)}
+									>
+										<ImportIcon />
+									</Button>
+								)}
+							</TextInputModal>
+						</Box>
+					</Tooltip>
+
+					<Tooltip title='Copy conversations to clipboard'>
+						<Button variant='contained' onClick={handleCopyConversationsClick}>
+							<CopyToClipboardIcon />
+						</Button>
+					</Tooltip>
+
+					<Tooltip title='Generate sequence diagram'>
+						<Button
+							variant='contained'
+							onClick={handleGenerateSequenceDiagramClick}
+						>
+							<GenerateSequenceDiagramIcon />
+						</Button>
+					</Tooltip>
 				</div>
 			</div>
 

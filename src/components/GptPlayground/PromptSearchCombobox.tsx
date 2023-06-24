@@ -1,10 +1,10 @@
 import type { ReactElement, Ref } from 'react'
 import { forwardRef, useCallback } from 'react'
 import { Autocomplete, TextField } from '@mui/material'
-import { prompts } from './prompts/prompts'
+import { promptTemplates } from './prompts/promptTemplates'
 import { matchSorter } from 'match-sorter'
 
-const promptOptions = [...prompts.map(prompt => prompt.key), '']
+const promptOptions = [...promptTemplates.map(prompt => prompt.key), '']
 const filterOptions = (
 	options: string[],
 	{ inputValue }: { inputValue: string }

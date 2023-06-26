@@ -3,6 +3,7 @@ import remarkGfm from 'remark-gfm'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 import ReactMarkdown from 'react-markdown'
+import SVG from 'react-inlinesvg'
 
 export default function Markdown({
 	content
@@ -26,6 +27,11 @@ export default function Markdown({
 					// eslint-disable-next-line unicorn/no-keyword-prefix
 					const match = /language-(\w+)/.exec(className ?? '')
 					const matchIndex = 1
+
+					if (match && match[matchIndex] === 'svg') {
+						return <SVG src={children[0] as string} />
+					}
+
 					return !inline && match ? (
 						<SyntaxHighlighter
 							/* eslint-disable-next-line react/jsx-props-no-spreading */

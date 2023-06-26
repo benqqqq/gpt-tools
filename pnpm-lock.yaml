@@ -43,6 +43,9 @@ dependencies:
   react-dom:
     specifier: 18.2.0
     version: 18.2.0(react@18.2.0)
+  react-inlinesvg:
+    specifier: ^3.0.2
+    version: 3.0.2(react@18.2.0)
   react-markdown:
     specifier: ^8.0.7
     version: 8.0.7(@types/react@18.2.6)(react@18.2.0)
@@ -6727,6 +6730,13 @@ packages:
       pify: 2.3.0
     dev: true
 
+  /exenv@1.2.2:
+    resolution:
+      {
+        integrity: sha512-Z+ktTxTwv9ILfgKCk32OX3n/doe+OcLTRtqK9pcL+JsP3J1/VW8Uvl4ZjLlKqeW4rzK4oesDOGMEMRIZqtP4Iw==
+      }
+    dev: false
+
   /expand-tilde@2.0.2:
     resolution:
       {
@@ -10903,6 +10913,30 @@ packages:
       loose-envify: 1.4.0
       react: 18.2.0
       scheduler: 0.23.0
+
+  /react-from-dom@0.6.2(react@18.2.0):
+    resolution:
+      {
+        integrity: sha512-qvWWTL/4xw4k/Dywd41RBpLQUSq97csuv15qrxN+izNeLYlD9wn5W8LspbfYe5CWbaSdkZ72BsaYBPQf2x4VbQ==
+      }
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.2.0
+    dev: false
+
+  /react-inlinesvg@3.0.2(react@18.2.0):
+    resolution:
+      {
+        integrity: sha512-BEzkpMGQwEY68fgaouY7ZWvAUPb8jbj7dE9iDbWZxstDhMuz9qfpxNgvGSENKcDMdpq/XHduSk/LAmNKin4nKw==
+      }
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      exenv: 1.2.2
+      react: 18.2.0
+      react-from-dom: 0.6.2(react@18.2.0)
+    dev: false
 
   /react-is@16.13.1:
     resolution:

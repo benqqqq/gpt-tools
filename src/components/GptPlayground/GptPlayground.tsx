@@ -127,8 +127,13 @@ export default function GptPlayground(): ReactElement {
 		]
 	)
 
+	// XXX: need refactor
 	const submitPrompt = useCallback(
-		async (userPrompt: string, systemPrompt: string): Promise<void> => {
+		async (
+			userPrompt: string,
+			systemPrompt: string,
+			disableMarkdownUserPromptHint?: boolean
+		): Promise<void> => {
 			setMessages([
 				...messages,
 				{
@@ -149,9 +154,11 @@ export default function GptPlayground(): ReactElement {
 			const submitUserPrompt = selectedPrompt.userPrompt
 				? generateUserPrompt(selectedPrompt.userPrompt, userPrompt)
 				: userPrompt
-			const submitUserPromptHint = selectedPrompt.disableMarkdownUserPromptHint
-				? ''
-				: `\n\n${assistantOutputHint}`
+			const submitUserPromptHint =
+				disableMarkdownUserPromptHint ??
+				selectedPrompt.disableMarkdownUserPromptHint
+					? ''
+					: `\n\n${assistantOutputHint}`
 
 			await submitMessages([
 				{
@@ -321,7 +328,7 @@ export default function GptPlayground(): ReactElement {
 						📍Prompt list
 					</Link>
 				</div>
-				<div className='my-5 space-x-2'>
+				<div className='my-5 flex flex-wrap'>
 					<PromptTools
 						messages={messages}
 						selectedPrompt={selectedPrompt}

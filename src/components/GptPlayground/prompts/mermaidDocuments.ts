@@ -1,4 +1,6 @@
 export const sequenceDiagramDocument = `
+Mermaid Js Sequence Diagram Document
+
 Syntax
 Participants
 The participants can be defined implicitly as in the first example on this page. The participants or actors are rendered in order of appearance in the diagram source text. Sometimes you might want to show the participants in a different order than how they appear in the first message. It is possible to specify the actor's order of appearance by doing the following:

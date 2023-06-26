@@ -19,22 +19,8 @@ import Message from './Message'
 import PromptChatBox from './PromptChatBox'
 import PromptSearchCombobox from './PromptSearchCombobox'
 import useKeyboardShortcutListener from './useKeyboardShortcutListener'
-import {
-	Autocomplete,
-	Box,
-	Button,
-	Slider,
-	TextField,
-	Tooltip
-} from '@mui/material'
-import {
-	promptGenerateMermaidSequenceDiagram,
-	promptImportContext
-} from './prompts/usefulPrompts'
-import CopyToClipboardIcon from '../ui/CopyToClipboardIcon'
-import GenerateSequenceDiagramIcon from '../ui/GenerateSequenceDiagramIcon'
-import ImportIcon from '../ui/ImportIcon'
-import TextInputModal from '../common/TextInputModal'
+import { Autocomplete, Slider, TextField } from '@mui/material'
+import PromptTools from './PromptTools'
 
 const GPT_TEMPERATURE = 1
 
@@ -283,35 +269,6 @@ export default function GptPlayground(): ReactElement {
 		[]
 	)
 
-	const handleCopyConversationsClick = useCallback(() => {
-		const text = messages
-			.map(({ role, content }) => `${role}: ${content}`)
-			.join('\n')
-		void navigator.clipboard.writeText(text)
-	}, [messages])
-
-	const handleGenerateSequenceDiagramClick = useCallback(() => {
-		void submitPrompt(
-			promptGenerateMermaidSequenceDiagram,
-			selectedPrompt.systemPrompt
-		)
-	}, [selectedPrompt.systemPrompt, submitPrompt])
-
-	const handleImportContextClick = useCallback(
-		(openModal: () => void) => () => openModal(),
-		[]
-	)
-
-	const handleImportTextModalClose = useCallback(
-		(text: string) => {
-			void submitPrompt(
-				`${text}\n\n${promptImportContext}`,
-				selectedPrompt.systemPrompt
-			)
-		},
-		[selectedPrompt.systemPrompt, submitPrompt]
-	)
-
 	return (
 		<div className='flex w-full'>
 			<Head title={`${selectedPrompt.key} | Fixed System Prompt Chat`} />
@@ -365,35 +322,11 @@ export default function GptPlayground(): ReactElement {
 					</Link>
 				</div>
 				<div className='my-5 space-x-2'>
-					<Tooltip title='Import context'>
-						<Box className='inline-block'>
-							<TextInputModal onOk={handleImportTextModalClose}>
-								{({ openModal }): ReactElement => (
-									<Button
-										variant='contained'
-										onClick={handleImportContextClick(openModal)}
-									>
-										<ImportIcon />
-									</Button>
-								)}
-							</TextInputModal>
-						</Box>
-					</Tooltip>
-
-					<Tooltip title='Copy conversations to clipboard'>
-						<Button variant='contained' onClick={handleCopyConversationsClick}>
-							<CopyToClipboardIcon />
-						</Button>
-					</Tooltip>
-
-					<Tooltip title='Generate sequence diagram'>
-						<Button
-							variant='contained'
-							onClick={handleGenerateSequenceDiagramClick}
-						>
-							<GenerateSequenceDiagramIcon />
-						</Button>
-					</Tooltip>
+					<PromptTools
+						messages={messages}
+						selectedPrompt={selectedPrompt}
+						submitPrompt={submitPrompt}
+					/>
 				</div>
 			</div>
 

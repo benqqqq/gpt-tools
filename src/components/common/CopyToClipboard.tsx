@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { useCallback, useState } from 'react'
 import { Tooltip } from '@mui/material'
-import CopyToClipboardIcon from '../ui/CopyToClipboardIcon'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 
 const noopFunction = (): void => {}
 
@@ -37,7 +37,7 @@ function CopyToClipboard({
 				<span>Copied !</span>
 			) : (
 				<button type='button' onClick={handleCopy}>
-					<CopyToClipboardIcon />
+					<ContentCopyIcon />
 				</button>
 			)}
 		</Tooltip>

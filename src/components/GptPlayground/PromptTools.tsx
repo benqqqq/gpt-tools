@@ -2,9 +2,6 @@ import type { ReactElement } from 'react'
 import { useCallback } from 'react'
 import { Box, Button, Tooltip } from '@mui/material'
 import TextInputModal from '../common/TextInputModal'
-import ImportIcon from '../ui/ImportIcon'
-import CopyToClipboardIcon from '../ui/CopyToClipboardIcon'
-import GenerateSequenceDiagramIcon from '../ui/GenerateSequenceDiagramIcon'
 import { promptImportContext } from './prompts/usefulPrompts'
 import type { IMessage, IPromptTemplate } from './types'
 import {
@@ -12,8 +9,11 @@ import {
 	mindmapDocument,
 	sequenceDiagramDocument
 } from './prompts/mermaidDocuments'
-import GenerateFlowchartIcon from '../ui/GenerateFlowchartIcon'
 import MapIcon from '@mui/icons-material/Map'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
+import SchemaIcon from '@mui/icons-material/Schema'
+import CandlestickChartIcon from '@mui/icons-material/CandlestickChart'
+import InputIcon from '@mui/icons-material/Input'
 
 interface IPromptToolsProps {
 	submitPrompt: (
@@ -88,7 +88,7 @@ export default function PromptTools({
 								variant='contained'
 								onClick={handleImportContextClick(openModal)}
 							>
-								<ImportIcon />
+								<InputIcon />
 							</Button>
 						)}
 					</TextInputModal>
@@ -97,7 +97,7 @@ export default function PromptTools({
 
 			<Tooltip title='Copy conversations to clipboard' className='m-1'>
 				<Button variant='contained' onClick={handleCopyConversationsClick}>
-					<CopyToClipboardIcon />
+					<ContentCopyIcon />
 				</Button>
 			</Tooltip>
 
@@ -106,13 +106,13 @@ export default function PromptTools({
 					variant='contained'
 					onClick={handleGenerateSequenceDiagramClick}
 				>
-					<GenerateSequenceDiagramIcon />
+					<CandlestickChartIcon />
 				</Button>
 			</Tooltip>
 
 			<Tooltip title='Generate flowchart' className='m-1'>
 				<Button variant='contained' onClick={handleGenerateFlowchartClick}>
-					<GenerateFlowchartIcon />
+					<SchemaIcon />
 				</Button>
 			</Tooltip>
 

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { promptTemplates } from '../components/GptPlayground/prompts/promptTemplates'
-import Markdown from '../components/GptPlayground/Markdown'
+import Markdown from '../components/common/Markdown'
 
 export default function PromptList(): ReactElement {
 	return (

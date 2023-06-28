@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { memo, useCallback } from 'react'
-import Markdown from './Markdown'
+import Markdown from '../common/Markdown'
 import { Button } from '@mui/material'
 import type { IMessage } from './types'
 

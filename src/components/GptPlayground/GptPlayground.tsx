@@ -20,7 +20,7 @@ import PromptChatBox from './PromptChatBox'
 import PromptSearchCombobox from './PromptSearchCombobox'
 import useKeyboardShortcutListener from './useKeyboardShortcutListener'
 import { Autocomplete, Slider, TextField } from '@mui/material'
-import PromptTools from './PromptTools'
+import QuickPromptToolContainer from './QuickPromptToolContainer'
 
 const GPT_TEMPERATURE = 1
 
@@ -329,7 +329,7 @@ export default function GptPlayground(): ReactElement {
 					</Link>
 				</div>
 				<div className='my-5 flex flex-wrap'>
-					<PromptTools
+					<QuickPromptToolContainer
 						messages={messages}
 						selectedPrompt={selectedPrompt}
 						submitPrompt={submitPrompt}

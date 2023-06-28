@@ -24,7 +24,7 @@ interface IPromptToolsProps {
 	selectedPrompt: IPromptTemplate
 	messages: IMessage[]
 }
-export default function PromptTools({
+export default function QuickPromptToolContainer({
 	submitPrompt,
 	selectedPrompt,
 	messages

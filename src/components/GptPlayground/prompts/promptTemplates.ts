@@ -1,5 +1,9 @@
 import type { IPromptTemplate } from '../types'
-import { sequenceDiagramDocument } from './mermaidDocuments'
+import {
+	flowchartDocument,
+	mindmapDocument,
+	sequenceDiagramDocument
+} from './mermaidDocuments'
 
 export const USER_PROMPT_SLOT = '<user-prompt>'
 
@@ -185,6 +189,14 @@ Your first task is help me rephrase and finish this article inside triple hash m
 	{
 		key: 'Mermaid Sequence Diagram Expert',
 		systemPrompt: `You are an expert of mermaid sequence diagram, here is the document:\n ${sequenceDiagramDocument}`
+	},
+	{
+		key: 'Mermaid Flowchart Expert',
+		systemPrompt: `You are an expert of mermaid flowchart, here is the document:\n ${flowchartDocument}`
+	},
+	{
+		key: 'Mermaid Mindmap Expert',
+		systemPrompt: `You are an expert of mermaid mindmap, here is the document:\n ${mindmapDocument}`
 	},
 	{
 		key: 'React SVG Generator',

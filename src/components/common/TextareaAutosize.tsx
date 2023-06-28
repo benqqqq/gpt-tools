@@ -24,6 +24,10 @@ const TextareaAutosize = forwardRef(
 			<MuiTextareaAutosize
 				onFocus={handleFocus}
 				onBlur={handleBlur}
+				style={{
+					maxHeight: '70vh',
+					overflow: 'auto'
+				}}
 				maxRows={isActive ? maxRows : maxRowsWhenNotActive}
 				ref={ref}
 				{...properties}

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { useCallback, useState } from 'react'
-import { Tooltip } from '@mui/material'
+import { Button, Tooltip } from '@mui/material'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 
 const noopFunction = (): void => {}
@@ -36,9 +36,9 @@ function CopyToClipboard({
 			{isCopied ? (
 				<span>Copied !</span>
 			) : (
-				<button type='button' onClick={handleCopy}>
+				<Button variant='text' type='button' onClick={handleCopy}>
 					<ContentCopyIcon />
-				</button>
+				</Button>
 			)}
 		</Tooltip>
 	)

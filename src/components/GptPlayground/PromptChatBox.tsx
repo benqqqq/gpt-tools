@@ -80,10 +80,13 @@ export default function PromptChatBox({
 	}, [userPromptLocalStorage])
 
 	const submit = useCallback(() => {
+		if (isSubmitting) {
+			return
+		}
 		setUserPrompt('')
 		userPromptLocalStorage.set('')
 		onSubmit(userPrompt, systemPrompt)
-	}, [onSubmit, systemPrompt, userPrompt, userPromptLocalStorage])
+	}, [onSubmit, systemPrompt, userPrompt, userPromptLocalStorage, isSubmitting])
 
 	const handleTextChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement>): void => {

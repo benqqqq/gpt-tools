@@ -1,35 +1,37 @@
 import type { Table } from 'dexie'
 import Dexie from 'dexie'
 
-export interface Credential {
+interface ICredential {
 	id?: number
 	name: string
 	value: string
 }
 
-export interface Conversation {
+/**
+ * TODO: implement the storing logic inside GpyPlayground (currently only have interface here)
+ */
+interface IChatMessage {
 	id?: number
-	scope: string
-	key: string
-	value: string
-	createdAt: Date
+	chatId: number
+	promptTemplateKey: string
+	role: 'assistant' | 'system' | 'user'
+	content: string
+	timestamp: Date
 }
 
-const VERSION = 4
+const VERSION = 5
 
 export class MySubClassedDexie extends Dexie {
-	// 'friends' is added by dexie when declaring the stores()
-	// We just tell the typing system this is the case
-	public readonly credentials!: Table<Credential>
+	public readonly credentials!: Table<ICredential>
 
-	public readonly conversations!: Table<Conversation>
+	public readonly chatMessages!: Table<IChatMessage>
 
 	public constructor() {
 		super('gpt-tools')
 		this.version(VERSION).stores({
 			// Primary key and indexed props
 			credentials: '++id, name',
-			conversations: '++id, scope, key, createdAt'
+			chatMessages: '++id, chatId, promptTemplateKey, role, timestamp'
 		})
 	}
 }

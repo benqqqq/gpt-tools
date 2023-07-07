@@ -2,7 +2,10 @@ import type { ReactElement } from 'react'
 import { useCallback } from 'react'
 import { Box, Button, Tooltip } from '@mui/material'
 import TextInputModal from '../common/TextInputModal'
-import { promptImportContext } from './prompts/usefulPrompts'
+import {
+	promptImportContext,
+	promptSummarizeToNote
+} from './prompts/usefulPrompts'
 import type { IMessage, IPromptTemplate } from './types'
 import {
 	flowchartDocument,
@@ -14,6 +17,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import SchemaIcon from '@mui/icons-material/Schema'
 import CandlestickChartIcon from '@mui/icons-material/CandlestickChart'
 import InputIcon from '@mui/icons-material/Input'
+import NoteIcon from '@mui/icons-material/Note'
 
 interface IPromptToolsProps {
 	submitPrompt: (
@@ -63,6 +67,10 @@ export default function QuickPromptToolContainer({
 		)
 	}, [selectedPrompt.systemPrompt, submitPrompt])
 
+	const handleSummarizeToNoteClick = useCallback(() => {
+		void submitPrompt(promptSummarizeToNote, selectedPrompt.systemPrompt)
+	}, [selectedPrompt.systemPrompt, submitPrompt])
+
 	const handleImportContextClick = useCallback(
 		(openModal: () => void) => () => openModal(),
 		[]
@@ -71,7 +79,7 @@ export default function QuickPromptToolContainer({
 	const handleImportTextModalClose = useCallback(
 		(text: string) => {
 			void submitPrompt(
-				`${text}\n\n${promptImportContext}`,
+				`###\n${text}\n###\n\n${promptImportContext}`,
 				selectedPrompt.systemPrompt
 			)
 		},
@@ -94,13 +102,11 @@ export default function QuickPromptToolContainer({
 					</TextInputModal>
 				</Box>
 			</Tooltip>
-
 			<Tooltip title='Copy conversations to clipboard' className='m-1'>
 				<Button variant='contained' onClick={handleCopyConversationsClick}>
 					<ContentCopyIcon />
 				</Button>
 			</Tooltip>
-
 			<Tooltip title='Generate sequence diagram' className='m-1'>
 				<Button
 					variant='contained'
@@ -109,16 +115,19 @@ export default function QuickPromptToolContainer({
 					<CandlestickChartIcon />
 				</Button>
 			</Tooltip>
-
 			<Tooltip title='Generate flowchart' className='m-1'>
 				<Button variant='contained' onClick={handleGenerateFlowchartClick}>
 					<SchemaIcon />
 				</Button>
 			</Tooltip>
-
 			<Tooltip title='Generate mindmap' className='m-1'>
 				<Button variant='contained' onClick={handleGenerateMindmapClick}>
 					<MapIcon />
+				</Button>
+			</Tooltip>
+			<Tooltip title='Summarize to Note' className='m-1'>
+				<Button variant='contained' onClick={handleSummarizeToNoteClick}>
+					<NoteIcon />
 				</Button>
 			</Tooltip>
 		</>

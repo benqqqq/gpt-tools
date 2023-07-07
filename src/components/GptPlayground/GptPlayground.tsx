@@ -278,7 +278,7 @@ export default function GptPlayground(): ReactElement {
 
 	return (
 		<div className='flex w-full'>
-			<Head title={`${selectedPrompt.key} | Fixed System Prompt Chat`} />
+			<Head title={`${selectedPrompt.key} | GPT Playground`} />
 
 			{/* Sidebar on Left */}
 			<div className='flex min-h-screen w-[250px] flex-col items-start bg-gray-800 p-3'>

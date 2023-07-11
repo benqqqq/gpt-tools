@@ -64,7 +64,7 @@ export default function GptPlayground(): ReactElement {
 	const navigate = useNavigate()
 	const [gptTemperature, setGptTemperature] = useState(GPT_TEMPERATURE)
 	const [gptModel, setGptModel] =
-		useState<IChatCompletionOptions['model']>('gpt-3.5-turbo-0613')
+		useState<IChatCompletionOptions['model']>('gpt-3.5-turbo')
 	const messageRef = useRef<HTMLDivElement>(null)
 
 	const submitMessages = useCallback(

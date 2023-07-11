@@ -151,9 +151,14 @@ export default function GptPlayground(): ReactElement {
 			])
 
 			// add system prompt and user prompt
-			const submitUserPrompt = selectedPrompt.userPrompt
-				? generateUserPrompt(selectedPrompt.userPrompt, userPrompt)
-				: userPrompt
+			let submitUserPrompt = userPrompt
+			// only the first time generate from userPromptTemplate because we might need to ask following question which doesn't need userPromptTemplate
+			if (selectedPrompt.userPrompt && messages.length === 0) {
+				submitUserPrompt = generateUserPrompt(
+					selectedPrompt.userPrompt,
+					userPrompt
+				)
+			}
 			const submitUserPromptHint =
 				disableMarkdownUserPromptHint ??
 				selectedPrompt.disableMarkdownUserPromptHint

@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { IVocabulary } from './types'
 import { useOpenAI } from '../../services/OpenAiContext'
 import { CircularProgress } from '@mui/material'
@@ -7,6 +7,7 @@ import Markdown from '../common/Markdown'
 
 interface IVocabularyDetailProps {
 	vocabulary: IVocabulary | undefined
+	onDetailGenerated: (detail: string) => void
 }
 
 const GPT_TEMPERATURE = 1
@@ -21,55 +22,71 @@ A list of vocabulary words that are similar in meaning or usage, along with a br
 In addition, feel free to include any other information you believe will be useful for someone trying to learn and understand this vocabulary word. Be sure to organize this information in a clear and appealing way, using markdown formatting to enhance its readability.`
 
 export default function VocabularyDetail({
-	vocabulary
+	vocabulary,
+	onDetailGenerated
 }: IVocabularyDetailProps): ReactElement {
 	const openai = useOpenAI()
 	const [isLoading, setIsLoading] = useState(false)
 	const [detail, setDetail] = useState('')
-
-	const submitVocabulary = useCallback(
-		(word: string) => {
-			const submit = async (): Promise<void> => {
-				setIsLoading(true)
-				setDetail('')
-				try {
-					await openai.chatCompletion({
-						messages: [
-							{
-								role: 'system',
-								content: systemPrompt
-							},
-							{
-								role: 'user',
-								content: `###${word}###`
-							}
-						],
-						model: 'gpt-3.5-turbo',
-						onContent: (content: string): void => {
-							setDetail(previousDetail => previousDetail + content)
-						},
-						onFinish: (): void => {
-							setIsLoading(false)
-						},
-						temperature: GPT_TEMPERATURE
-					})
-				} catch (error) {
-					const errorMessage = (error as Error).message
-					setDetail(errorMessage)
-					setIsLoading(false)
-				}
-			}
-			void submit()
-		},
-		[openai]
-	)
+	const finishEvent = useMemo(() => new CustomEvent('finishEvent'), [])
 
 	useEffect(() => {
 		if (!vocabulary) {
 			return
 		}
-		submitVocabulary(vocabulary.word)
-	}, [submitVocabulary, vocabulary])
+
+		if (vocabulary.detail) {
+			setDetail(vocabulary.detail)
+			return
+		}
+
+		const submit = async (): Promise<void> => {
+			setIsLoading(true)
+			setDetail('')
+			try {
+				await openai.chatCompletion({
+					messages: [
+						{
+							role: 'system',
+							content: systemPrompt
+						},
+						{
+							role: 'user',
+							content: `###${vocabulary.word}###`
+						}
+					],
+					model: 'gpt-3.5-turbo',
+					onContent: (content: string): void => {
+						setDetail(previousDetail => previousDetail + content)
+					},
+					onFinish: (): void => {
+						setIsLoading(false)
+						document.dispatchEvent(finishEvent)
+					},
+					temperature: GPT_TEMPERATURE
+				})
+			} catch (error) {
+				const errorMessage = (error as Error).message
+				setDetail(errorMessage)
+				setIsLoading(false)
+			}
+		}
+
+		void submit()
+	}, [finishEvent, openai, vocabulary])
+
+	useEffect(() => {
+		const listener = (): void => {
+			if (vocabulary) {
+				onDetailGenerated(detail)
+			}
+		}
+		document.addEventListener('finishEvent', listener)
+
+		return () => {
+			document.removeEventListener('finishEvent', listener)
+		}
+	}, [detail, finishEvent, onDetailGenerated, vocabulary])
 
 	return (
 		<div>

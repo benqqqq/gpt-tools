@@ -3,4 +3,5 @@ export interface IVocabulary {
 	word: string
 	timestamp: Date
 	archived: boolean
+	detail?: string
 }

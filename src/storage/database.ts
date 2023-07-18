@@ -24,6 +24,7 @@ interface IVocabulary {
 	word: string
 	timestamp: Date
 	archived: boolean
+	detail?: string
 }
 
 const VERSION = 6

@@ -89,6 +89,30 @@ export default function Vocabulary(): ReactElement {
 		void deleteVocabularyFromDatabase()
 	}, [])
 
+	const handleDetailGenerated = useCallback(
+		(detail: string) => {
+			if (!selectedVocabulary) {
+				return
+			}
+			void database.vocabulary.update(selectedVocabulary.id, {
+				detail
+			})
+
+			setVocabularyList(previousVocabularyList =>
+				previousVocabularyList.map(previousVocabulary => {
+					if (previousVocabulary.id === selectedVocabulary.id) {
+						return {
+							...previousVocabulary,
+							detail
+						}
+					}
+					return previousVocabulary
+				})
+			)
+		},
+		[selectedVocabulary]
+	)
+
 	return (
 		<div className='flex h-screen'>
 			<div className='w-[200px] overflow-y-scroll p-4'>
@@ -103,7 +127,10 @@ export default function Vocabulary(): ReactElement {
 					<VocabularyInput onSubmit={handleInputSubmit} />
 				</div>
 				<div className='flex-grow p-4'>
-					<VocabularyDetail vocabulary={selectedVocabulary} />
+					<VocabularyDetail
+						vocabulary={selectedVocabulary}
+						onDetailGenerated={handleDetailGenerated}
+					/>
 				</div>
 			</div>
 		</div>

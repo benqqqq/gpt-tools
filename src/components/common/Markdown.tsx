@@ -12,6 +12,7 @@ export default function Markdown({
 }): ReactElement {
 	return (
 		<ReactMarkdown
+			key={content}
 			className='prose max-w-none'
 			remarkPlugins={[remarkGfm]}
 			components={{

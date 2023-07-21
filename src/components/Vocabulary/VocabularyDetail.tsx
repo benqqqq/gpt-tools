@@ -88,12 +88,16 @@ export default function VocabularyDetail({
 		}
 	}, [detail, finishEvent, onDetailGenerated, vocabulary])
 
+	const highlightedDetail = vocabulary
+		? detail.replaceAll(new RegExp(vocabulary.word, 'gi'), `**$&**`)
+		: detail
+
 	return (
 		<div>
 			<h3>VocabularyDetail</h3>
 			{isLoading ? <CircularProgress /> : undefined}
 			{vocabulary ? <div>{vocabulary.word}</div> : undefined}
-			{detail ? <Markdown content={detail} /> : undefined}
+			{detail ? <Markdown content={highlightedDetail} /> : undefined}
 		</div>
 	)
 }

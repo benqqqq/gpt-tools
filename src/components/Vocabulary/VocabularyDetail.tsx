@@ -1,9 +1,9 @@
+import { CircularProgress } from '@mui/material'
 import type { ReactElement } from 'react'
 import { useEffect, useMemo, useState } from 'react'
-import type { IVocabulary } from './types'
 import { useOpenAI } from '../../services/OpenAiContext'
-import { CircularProgress } from '@mui/material'
 import Markdown from '../common/Markdown'
+import type { IVocabulary } from './types'
 
 interface IVocabularyDetailProps {
 	vocabulary: IVocabulary | undefined
@@ -55,7 +55,7 @@ export default function VocabularyDetail({
 							content: `###${vocabulary.word}###`
 						}
 					],
-					model: 'gpt-3.5-turbo',
+					model: 'gpt-4o-mini',
 					onContent: (content: string): void => {
 						setDetail(previousDetail => previousDetail + content)
 					},
